@@ -1,0 +1,29 @@
+
+services:
+  app:
+    image: competition:myImage
+    build: 
+      context: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - /mnt/d/recap/nume-aplicatie:/app
+    networks:
+      - app-network
+    depends_on:
+      - db
+  db:
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: parola123
+      POSTGRES_DB: recap
+    ports:
+      - "1234:5432"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+    

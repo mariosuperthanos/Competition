@@ -3,7 +3,7 @@ import prisma from "../../../../lib/prisma";
 import Joi from "joi";
 
 export const POST = async (req: Request) => {
-  console.log(1);
+  console.log(12345);
 
   const schema = Joi.object({
     title: Joi.string().required(), // String obligatoriu

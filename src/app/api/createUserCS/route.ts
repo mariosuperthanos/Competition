@@ -5,7 +5,7 @@ import { createUser } from "../../../../library/createUser";
 export async function POST(req: Request) {
   try {
     const { password, email, username } = await req.json();
-    console.log(1);
+    console.log("Eminem");
     
     const createNewUser = await createUser(username, email, password);
     
