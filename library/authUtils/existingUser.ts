@@ -6,15 +6,15 @@ export const existingUser = async (
   inputEmail: string
 ) => {
   // console.log(inputEmail);
-  // Găsește utilizatorul după email
+  // find the user in DB via email
   const user = await prisma.user.findUnique({
     where: { email: inputEmail },
     select: { email: true, id: true, password: true, name: true },
   });
 
-  if (!user) return undefined; // Dacă email-ul nu există, returnează `undefined`
+  if (!user) return undefined;
 
-  // Verifică dacă parola există deja
+  // compare the passwords
   const isPasswordUsed = await bcrypt.compare(inputPassword, user.password);
 
   return isPasswordUsed ? { email: user.email, id: user.id, name:user.name } : undefined;

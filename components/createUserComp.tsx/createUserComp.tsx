@@ -33,13 +33,15 @@ import removeDiacritics from "../../library/converters/removeDiacritics";
 import MapComponent from "../event/Map";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { timeToMinutes } from "../../library/converters/timeToMinutes";
-import { formSchema } from "../../library/forms/form";
+import { formSchema } from "../../library/schemas/create-event";
 import { useSession } from "next-auth/react";
 
 let firstTime = true;
+// if the country is not writted corect, then the county field wont be displayed
 let firstTimeCity = true;
 
 const CreateUserComp = () => {
+  // form based on schema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -56,7 +58,8 @@ const CreateUserComp = () => {
     },
   });
 
-  // functie that tells if the date from map point is OK
+  // function that tells if the data from interactive map is OK
+  // This function is getting passed into the MapComponent(it sends the data back)
   const updateUIonClick = (city: string, country: string) => {
     console.log(city, country);
     if (city !== undefined) {
@@ -70,6 +73,7 @@ const CreateUserComp = () => {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
+      // it also verify JWT token
       const request = await axios.post(
         "http://localhost:3000/api/createEvent",
         values
@@ -83,7 +87,7 @@ const CreateUserComp = () => {
     }
   };
 
-  // funciton that validate text input for country/city
+  // funciton that validate text input from "country" and "county" fields
   const validate = async (value: string, mode: "country" | "city") => {
     try {
       const REQ_URL =
@@ -101,6 +105,7 @@ const CreateUserComp = () => {
       const cleanedText = removeDiacritics(data);
       console.log(cleanedText);
       console.log(value);
+      // compare the country/county from API with the input field
       if (cleanedText.toLowerCase() === value.toLowerCase()) {
         // console.log(123);
         // reset
@@ -321,7 +326,7 @@ const CreateUserComp = () => {
           lat={lat}
           lng={lng}
           shouldRender={!firstTimeCity}
-          passData={updateUIonClick}
+          settings={{ purpose: "interactive", passData: updateUIonClick }}
         />
 
         {/* Submit Button */}

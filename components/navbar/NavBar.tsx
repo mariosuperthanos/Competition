@@ -14,8 +14,8 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function NavBar() {
-  const [isLoggedIn, setIsLoggedIn] = React.useState(false); // This should be managed by your auth system
-
+  const [isLoggedIn, setIsLoggedIn] = React.useState(false);
+  
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-5">
       <div className="container flex h-14 items-center justify-between">

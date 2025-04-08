@@ -1,31 +1,30 @@
 import prisma from "../../lib/prisma";
 import { existingUser } from "./existingUser";
 import { hashPassword } from "./hashPassword";
-// validate + create
+
+// verify if the email and password are unused and creat a new user
 export const createUser = async (
   username: string,
   email: string,
   password: string
 ) => {
   try {
-    console.log(12234);
-    // Verifică dacă email-ul există deja
+    // verify if the email already exists
     const existingEmail = await prisma.user.findUnique({ where: { email } });
-    console.log(123);
     if (existingEmail) {
       throw new Error("There's already an account with this email!");
     }
 
-    // Verifică dacă parola a fost folosită anterior
+    // verify if the password already exists
     const isPasswordUsed = await existingUser(password, email);
     if (isPasswordUsed) {
       throw new Error("This password has already been used!");
     }
 
-    // Hash-uiește parola
+    // hash the password
     const hashedPassword = await hashPassword(password);
 
-    // Creează utilizatorul în baza de date
+    // add the user in the DB
     const newUser = await prisma.user.create({
       data: { name: username, email, password: hashedPassword },
     });

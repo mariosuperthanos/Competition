@@ -6,35 +6,19 @@ import { use } from "react";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
+import schema from "../../../../library/schemas/eventServerSide";
 
 export const POST = async (req: Request) => {
+  // validate the cookie by using next auth server side function
   const cookie = await getServerSession(authOptions);
-  console.log(1);
-  const authHeader = req.headers.get('cookie'); // ex: "Bearer nextauth=valoare"
-  console.log("Authorization header:", authHeader);
 
-  console.log(cookie);
+  // const authHeader = req.headers.get('cookie');
+  // console.log("Authorization header:", authHeader);
+
+  // console.log(cookie);
   if (!cookie) {
     return NextResponse.json({ data: "You are not logged in." }, { status: 401 });
   }
-
-  console.log(12345);
-
-  const schema = Joi.object({
-    title: Joi.string().required(), // String obligatoriu
-    description: Joi.string().required(), // String obligatoriu
-    date: Joi.string().required(), // Validare pentru data ISO
-    startHour: Joi.string()
-      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9]) (AM|PM)$/)
-      .required(), // Validare oră în format HH:mm
-    finishHour: Joi.string()
-      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9]) (AM|PM)$/)
-      .required(), // Validare oră în format HH:mm
-    country: Joi.string().required(), // String obligatoriu
-    city: Joi.string().required(), // String obligatoriu
-    lat: Joi.number().required(), // Validare latitudine
-    lng: Joi.number().required(), // Validare longitudine
-  });
 
   try {
     let {
@@ -54,7 +38,7 @@ export const POST = async (req: Request) => {
     lat = parseFloat(lat);
     lng = parseFloat(lng);
 
-    // validate
+    // validate the req body
     await schema.validateAsync({
       title,
       description,
@@ -69,6 +53,7 @@ export const POST = async (req: Request) => {
 
     const hostsArray = [userid];
 
+    // add event in db
     const addPost = await prisma.event.create({
       data: {
         title,

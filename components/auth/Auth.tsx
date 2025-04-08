@@ -24,51 +24,26 @@ import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { signIn, useSession } from "next-auth/react";
-import { createUser } from "../../library/authUtils/createUser";
+// import { signIn, useSession } from "next-auth/react";
+// import { createUser } from "../../library/authUtils/createUser";
 import { loginUtil } from "../../library/authUtils/loginUtil";
+// schema for loggin fields
+import validationObject from "../../library/schemas/auth";
 
 interface AuthFormProps {
   mode: "signUp" | "login";
 }
 
-const validationObject = (mode: "login" | "signUp") => {
-  return z.object({
-    email: z
-      .string()
-      .min(2, { message: "Email must be at least 2 characters." }),
-    password: z
-      .string()
-      .min(8, { message: "Password must be at least 8 characters." }),
-    ...(mode === "signUp" && {
-      username: z
-        .string()
-        .min(2, { message: "Username must be at least 2 characters." }),
-    }),
-  });
-};
-
-// const formSchema = z.object({
-//   username: z.string().min(2, {
-//     message: "Username must be at least 2 characters.",
-//   }),
-//   email: z.string().min(2, {
-//     message: "Username must be at least 2 characters.",
-//   }),
-//   password: z.string().min(8, {
-//     message: "Username must be at least 2 characters.",
-//   }),
-// });
-
 const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
-  const { data: session, status } = useSession();
-  const [modeState, setModeState] = useState<"signUp" | "login">(mode);
+  // the error/success text
   const [feedback, setFeedback] = useState<string>("");
+  // create a validation schema based on mode
   const formSchema = validationObject(mode);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    // dummy data
     defaultValues: {
       email: "gasds@gag.com",
       username: "david",
@@ -78,6 +53,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
 
   async function signUpHandler(values: z.infer<typeof formSchema>) {
     try {
+      // API_URL for creating a user without creating a JWT token
       const API_URL = "http://localhost:3000/api/createUserCS";
 
       // Send request to create a new user
@@ -87,11 +63,13 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         email: values.email,
       });
 
+      // error if a user already exists
       if (newUserResponse?.error) {
         throw new Error(newUserResponse.error);
       }
 
-      // Attempt to log in after successful user creation
+      // attempt to log in after successful user creation
+      // loginUtil is client side function
       const loginUserResponse = await loginUtil(values.email, values.password);
 
       if (loginUserResponse?.message !== "Login successful") {
@@ -106,6 +84,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
     }
   }
 
+  // it calls the client side loggin function
   async function loginHandler(values: z.infer<typeof formSchema>) {
     const response = await loginUtil(values.email, values.password);
 
@@ -168,7 +147,7 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
         <Button type="submit" className="mt-6">
           Submit
         </Button>
-        {modeState === "signUp" ? (
+        {mode === "signUp" ? (
           <Link href="/auth/login">Already have an account?</Link>
         ) : (
           <Link href="/auth/signup">Create new account</Link>

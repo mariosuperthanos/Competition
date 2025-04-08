@@ -5,7 +5,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Toggle } from "@/components/ui/toggle"
 
 
-// Componenta TimePicker
 function TimePicker({ value, onChange }) {
   const [hour, setHour] = useState<string>("12");
   const [minute, setMinute] = useState<string>("00");

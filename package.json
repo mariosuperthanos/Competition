@@ -9,6 +9,8 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@apollo/server": "^4.12.0",
+    "@as-integrations/next": "^3.2.0",
     "@hookform/resolvers": "^3.10.0",
     "@mapbox/node-pre-gyp": "^2.0.0",
     "@prisma/client": "^6.5.0",
@@ -25,6 +27,8 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
+    "graphql": "^16.10.0",
+    "graphql-http": "^1.22.4",
     "https-proxy-agent": "^7.0.6",
     "leaflet": "^1.9.4",
     "lucide-react": "^0.474.0",

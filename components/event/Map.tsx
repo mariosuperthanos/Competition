@@ -56,16 +56,30 @@ import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
 import getLocation from "../../library/map/getLocation";
 
+interface Coords {
+  lat: number;
+  lng: number;
+}
+// the map can have 3 purposes:
+// 1. for creating an event -> interactive
+// 2. for searching for more events in a specific area, therfore more murkups -> search
+// 3. for displaying the locaiton of a specific event, 1 markup -> marker
+interface Settings {
+  purpose: "interactive" | "search" | "marker";
+  passData?: any;
+  searchMarkups?: [Coords];
+}
+
 const MapComponent = ({
   lat,
   lng,
   shouldRender,
-  passData,
+  settings,
 }: {
   lat: string;
   lng: string;
   shouldRender: boolean;
-  passData: any;
+  settings: Settings;
 }) => {
   const [isMarkup, setIsMarkup] = useState<boolean>(false);
   // console.log(lat, lng);
@@ -74,19 +88,19 @@ const MapComponent = ({
   const marker = useRef<mapboxgl.Marker | null>(null);
 
   useEffect(() => {
-    // Verificăm dacă avem container și dacă renderarea este permisă
+    // if we already have a map or shouldRender is false -> exit useEffect
     if (!mapContainer.current || !shouldRender) return;
 
     const latitude = parseFloat(lat);
     const longitude = parseFloat(lng);
 
-    // Verificăm dacă coordonatele sunt valide
+    // Verify the validity of lat and lng
     if (isNaN(latitude) || isNaN(longitude)) {
       console.error("Coordonate invalide:", { lat, lng });
       return;
     }
 
-    // Inițializăm harta dacă nu există
+    //initialize the map and its default settings
     if (!map.current) {
       mapboxgl.accessToken =
         "pk.eyJ1IjoiY3Jvbm9zcmVhcGVyIiwiYSI6ImNtNm1udWt2dTBocDAya3NtemJic2F5NmoifQ.LT4dGB9RjShlozhmAVzm-w";
@@ -98,47 +112,52 @@ const MapComponent = ({
         zoom: 12,
       });
 
-      // Adăugăm marker-ul inițial
-      // marker.current = new mapboxgl.Marker()
-      //   .setLngLat([longitude, latitude])
-      //   .addTo(map.current);
     } else {
-      // Dacă harta există deja, actualizăm doar poziția
+      // if the map exists
       map.current.setCenter([longitude, latitude]);
       marker.current?.setLngLat([longitude, latitude]);
     }
+    // if the map is for creating an event
+    if (settings.purpose == "interactive") {
+      // let the user click on the meeting point
+      map.current.on("click", async (e) => {
+        const { lat, lng } = e.lngLat;
+        // console.log("Click coordinates:", lat, lng);
 
-    if()
-    map.current.on("click", async (e) => {
-      const { lat, lng } = e.lngLat;
-      // console.log("Click coordinates:", lat, lng);
-
-      // Ștergem marker-ul existent dacă există
-      if (marker.current) {
-        marker.current.remove();
-      }
-
-      // Creăm și adăugăm noul marker
-      marker.current = new mapboxgl.Marker()
-        .setLngLat([lng, lat])
-        .addTo(map.current!);
-
-      let city;
-
-      // Loop care rulează de maximum 5 ori cât timp city este undefined
-      for (let i = 0; i < 10; i++) {
-        const { city: currentCity, country } = await getLocation(lat, lng);
-        city = currentCity;
-
-        if (city !== undefined) {
-          // console.log(`City found: ${city}, Country: ${country}`);
-          passData(city, country);
-          break; // Oprește bucla când city nu mai este undefined
-        } else {
-          // console.log(`City is still undefined. Attempt ${i + 1}`);
+        if (marker.current) {
+          marker.current.remove();
         }
-      }
-    });
+
+        // add the new marker
+        marker.current = new mapboxgl.Marker()
+          .setLngLat([lng, lat])
+          .addTo(map.current!);
+
+        let city;
+
+        // a loop that runs 10 times and make more calls to API if the results are still undefined
+        for (let i = 0; i < 10; i++) {
+          const { city: currentCity, country } = await getLocation(lat, lng);
+          city = currentCity;
+
+          if (city !== undefined) {
+            // console.log(`City found: ${city}, Country: ${country}`);
+            settings.passData(city, country);
+            break; // Oprește bucla când city nu mai este undefined
+          } else {
+            // console.log(`City is still undefined. Attempt ${i + 1}`);
+          }
+        }
+      });
+      // if the map has to display only the meeting point
+    } else if (settings.purpose == "marker") {
+      const lngMarkup = parseFloat(lng);
+      const latMarkup = parseFloat(lat);
+
+      marker.current = new mapboxgl.Marker()
+        .setLngLat([lngMarkup, latMarkup])
+        .addTo(map.current!);
+    }
 
     // Cleanup function
     return () => {
@@ -149,7 +168,7 @@ const MapComponent = ({
         marker.current = null;
       }
     };
-  }, [lat, lng, shouldRender]); // Dependențe actualizate
+  }, [lat, lng]); // Dependențe actualizate
 
   return (
     <div

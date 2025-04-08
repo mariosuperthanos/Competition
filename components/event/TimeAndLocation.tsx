@@ -36,15 +36,17 @@ export default function TimeAndLocationCard({
 
   return (
     <Fragment>
-      <div className="flex flex-col p-4 space-y-8" style={{ marginLeft: '20px' }}>
-        <Card className="space-y-4 p-6 w-full max-w-lg" >
+      <div
+        className="flex flex-col p-4 space-y-8"
+        style={{ marginLeft: "20px" }}
+      >
+        <Card className="space-y-4 p-6 w-full max-w-lg">
           <CardTitle className="text-xl font-semibold">
             Event Time & Location
           </CardTitle>
           <CardContent className="space-y-2">
             <p>
-              <strong>Date:</strong>{" "}
-              {formattedString}
+              <strong>Date:</strong> {formattedString}
             </p>
             <p>
               <strong>Start Time:</strong> {time.startHour}
@@ -59,7 +61,12 @@ export default function TimeAndLocationCard({
           </CardContent>
         </Card>
         <div className="w-2/5 h-[200px]">
-          <MapComponent lat={location.lat} lng={location.lng} shouldRender={true} />
+          <MapComponent
+            lat={location.lat}
+            lng={location.lng}
+            shouldRender={true}
+            settings={{ purpose: "marker" }}
+          />
         </div>
       </div>
     </Fragment>
