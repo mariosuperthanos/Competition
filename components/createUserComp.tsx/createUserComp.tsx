@@ -29,64 +29,15 @@ import { z } from "zod";
 import TimePicker from "./time-picker";
 import axios from "axios";
 import { empty } from "@prisma/client/runtime/library";
-import removeDiacritics from "../../library/removeDiacritics";
+import removeDiacritics from "../../library/converters/removeDiacritics";
 import MapComponent from "../event/Map";
 import "mapbox-gl/dist/mapbox-gl.css";
+import { timeToMinutes } from "../../library/converters/timeToMinutes";
+import { formSchema } from "../../library/forms/form";
+import { useSession } from "next-auth/react";
 
 let firstTime = true;
 let firstTimeCity = true;
-
-// Funcție pentru a transforma ora în minute
-const timeToMinutes = (time: string) => {
-  const [hour, minute] = time.split(":");
-  const [minutes, period] = minute.split(" ");
-  let hours24 = parseInt(hour);
-
-  if (period === "PM" && hours24 !== 12) {
-    hours24 += 12;
-  } else if (period === "AM" && hours24 === 12) {
-    hours24 = 0;
-  }
-
-  return hours24 * 60 + parseInt(minutes);
-};
-
-const formSchema = z
-  .object({
-    title: z.string().min(2, {
-      message: "Title must be at least 2 characters.",
-    }),
-    description: z.string().min(10, {
-      message: "Description must be at least 10 characters.",
-    }),
-    date: z
-      .date({
-        required_error: "A date is required.",
-      })
-      .refine((date) => date > new Date(), {
-        message: "Date must be in the future.",
-      }),
-    startHour: z.string(),
-    finishHour: z.string(),
-    country: z.string().min(1, "A country is required"),
-    city: z.string().min(1, "A country is required"),
-    map: z.boolean().refine((value) => value === true, {
-      message: "Map must be true",
-    }),
-    lat: z.string(),
-    lng: z.string(),
-  })
-  .refine(
-    (data) => {
-      const startMinutes = timeToMinutes(data.startHour);
-      const finishMinutes = timeToMinutes(data.finishHour);
-      return finishMinutes > startMinutes;
-    },
-    {
-      message: "Finish hour must be greater than start hour.",
-      path: ["finishHour"],
-    }
-  );
 
 const CreateUserComp = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -97,29 +48,42 @@ const CreateUserComp = () => {
       date: undefined,
       startHour: "12:00 PM",
       finishHour: "12:00 PM",
-      country: "",
+      country: "Romania",
       city: "",
       map: false,
-      lat: '40',
-      lng: '26'
+      lat: "40",
+      lng: "26",
     },
   });
 
-  const updateUIonClick = (city: string, country: string) =>{
+  // functie that tells if the date from map point is OK
+  const updateUIonClick = (city: string, country: string) => {
     console.log(city, country);
     if (city !== undefined) {
-      form.setValue('city', removeDiacritics(city));
+      form.setValue("city", removeDiacritics(city));
       form.clearErrors(`city`);
+      form.setValue("map", true);
     }
-    form.setValue('country', removeDiacritics(country));
+    form.setValue("country", removeDiacritics(country));
     form.clearErrors(`country`);
-  }
-
-  const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
   };
 
-  // Funcție de validare personalizată pentru country
+  const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    try {
+      const request = await axios.post(
+        "http://localhost:3000/api/createEvent",
+        values
+      );
+
+      if (request.status == 200) {
+        console.log("success");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  // funciton that validate text input for country/city
   const validate = async (value: string, mode: "country" | "city") => {
     try {
       const REQ_URL =
@@ -138,16 +102,16 @@ const CreateUserComp = () => {
       console.log(cleanedText);
       console.log(value);
       if (cleanedText.toLowerCase() === value.toLowerCase()) {
-        console.log(123);
+        // console.log(123);
         // reset
         form.setValue(mode, cleanedText);
         form.clearErrors(mode);
         if (mode === "city") {
           const lat2 = req.data.results[1].geometry.lat;
           const lng2 = req.data.results[1].geometry.lng;
-          form.setValue('lat', lat2.toString());
-          form.setValue('lng', lng2.toString());
-          firstTimeCity=false;
+          form.setValue("lat", lat2.toString());
+          form.setValue("lng", lng2.toString());
+          firstTimeCity = false;
         }
         if (mode === "country") {
           firstTime = false;
@@ -162,7 +126,7 @@ const CreateUserComp = () => {
 
   const lat = form.watch("lat");
   const lng = form.watch("lng");
-  console.log(lat, lng)
+  // console.log(lat, lng)
 
   return (
     <Form {...form}>

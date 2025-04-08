@@ -11,7 +11,7 @@ import "leaflet/dist/leaflet.css";
 import dynamic from "next/dynamic";
 import { Fragment } from "react";
 import MapComponent from "./Map";
-import formatEventDate from "../../library/customDate";
+import formatEventDate from "../../library/converters/customDate";
 
 interface TimeAndLocationProps {
   time: {

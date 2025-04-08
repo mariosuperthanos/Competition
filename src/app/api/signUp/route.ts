@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createUser } from "../../../../library/createUser";
+import { createUser } from "../../../../library/authUtils/createUser";
 import axios from "axios";
 
 // export const GET = async () => {

@@ -29,6 +29,7 @@ export default async function Event({
   location,
   image,
 }: PageProps) {
+  
   const cardStyle = {
     width: "50rem", // 96 în Tailwind, în unități rem
     priority: "high", // Exemplu pentru setarea unei proprietăți de prioritate

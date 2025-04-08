@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
@@ -15,18 +15,18 @@ datasource db {
 }
 
 model User {
-  id            String  @id @default(uuid())
-  name          String
-  email         String  @unique
-  password      String  @unique
-  // hostedEvents  Event[] @relation("UserEvents")
+  id           String  @id @default(uuid())
+  name         String
+  email        String  @unique
+  password     String  @unique
+  hostedEvents Event[] @relation("UserEvents")
   // plannedEvents Event[] @relation("Attendees")
 }
 
 model Event {
-  id          String   @id @default(uuid())
+  id          String @id @default(uuid())
   title       String
-  // hosts       User[]   @relation("UserEvents")
+  hosts       User[] @relation("UserEvents")
   description String
   date        String
   startHour   String

@@ -1,29 +1,43 @@
+/* eslint-disable prefer-const */
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import Joi from "joi";
+import { use } from "react";
+import { getServerSession } from "next-auth";
+import { AuthOptions } from "next-auth";
+import { authOptions } from "../auth/[...nextauth]/route";
 
 export const POST = async (req: Request) => {
+  const cookie = await getServerSession(authOptions);
+  console.log(1);
+  const authHeader = req.headers.get('cookie'); // ex: "Bearer nextauth=valoare"
+  console.log("Authorization header:", authHeader);
+
+  console.log(cookie);
+  if (!cookie) {
+    return NextResponse.json({ data: "You are not logged in." }, { status: 401 });
+  }
+
   console.log(12345);
 
   const schema = Joi.object({
     title: Joi.string().required(), // String obligatoriu
     description: Joi.string().required(), // String obligatoriu
-    date: Joi.date().iso().required(), // Validare pentru data ISO
+    date: Joi.string().required(), // Validare pentru data ISO
     startHour: Joi.string()
-      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/)
+      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9]) (AM|PM)$/)
       .required(), // Validare oră în format HH:mm
     finishHour: Joi.string()
-      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9])$/)
+      .pattern(/^([01]?[0-9]|2[0-3]):([0-5][0-9]) (AM|PM)$/)
       .required(), // Validare oră în format HH:mm
     country: Joi.string().required(), // String obligatoriu
     city: Joi.string().required(), // String obligatoriu
-    lat: Joi.number()
-      .required(), // Validare latitudine
-    lng: Joi.number()
-      .required(), // Validare longitudine
+    lat: Joi.number().required(), // Validare latitudine
+    lng: Joi.number().required(), // Validare longitudine
   });
+
   try {
-    const {
+    let {
       title,
       description,
       date,
@@ -35,18 +49,25 @@ export const POST = async (req: Request) => {
       lng,
     } = await req.json();
 
+    const userid=cookie.token.id;
+
+    lat = parseFloat(lat);
+    lng = parseFloat(lng);
+
     // validate
     await schema.validateAsync({
       title,
       description,
-      date,
       startHour,
+      date,
       finishHour,
       country,
       city,
       lat,
       lng,
     });
+
+    const hostsArray = [userid];
 
     const addPost = await prisma.event.create({
       data: {
@@ -59,9 +80,11 @@ export const POST = async (req: Request) => {
         city,
         lat,
         lng,
+        hosts: {
+          connect: hostsArray.map((id) => ({ id })), // Conectează utilizatorii prin ID-uri
+        },
       },
     });
-
     return NextResponse.json({ data: addPost }, { status: 200 });
   } catch (err) {
     return NextResponse.json({ err }, { status: 500 });

@@ -27,8 +27,8 @@ import axios from "axios";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { signIn, useSession } from "next-auth/react";
-import { createUser } from "../../library/createUser";
-import { loginUtil } from "../../library/loginUtil";
+import { createUser } from "../../library/authUtils/createUser";
+import { loginUtil } from "../../library/authUtils/loginUtil";
 
 interface AuthFormProps {
   mode: "signUp" | "login";

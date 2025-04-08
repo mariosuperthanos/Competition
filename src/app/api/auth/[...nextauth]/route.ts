@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import prisma from "../../../../../lib/prisma";
-import { existingUser } from "../../../../../library/existingUser";
+import { existingUser } from "../../../../../library/authUtils/existingUser";
 import { error } from "console";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
@@ -82,7 +82,9 @@ export const authOptions = {
         if (getUser === undefined) {
           throw new Error("Could not log you in!");
         }
+        console.log("Get user is", getUser);
         return {
+          name: getUser.name,
           id: getUser.id,
           email: getUser.email,
         };
@@ -95,6 +97,7 @@ export const authOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
+        token.name = user.name;
         token.id = user.id; // Adaugă id-ul utilizatorului în token
         token.email = user.email; // Adaugă email-ul utilizatorului în token
       }

@@ -25,6 +25,7 @@ async function testCredentialsSignIn(email: string, password: string) {
     // console.log("Initial Cookies:", csrfCookies);
 
     // Step 3: Send a POST request to /api/auth/callback/test with CSRF token and cookies
+    // This is the part where the password and email get verfied
     const signInResponse = await fetch(
       `${baseUrl}/api/auth/callback/credentials`,
       {

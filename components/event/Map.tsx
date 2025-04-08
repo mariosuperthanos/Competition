@@ -54,7 +54,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
-import getLocation from "../../library/getLocation";
+import getLocation from "../../library/map/getLocation";
 
 const MapComponent = ({
   lat,
@@ -68,7 +68,7 @@ const MapComponent = ({
   passData: any;
 }) => {
   const [isMarkup, setIsMarkup] = useState<boolean>(false);
-  console.log(lat, lng);
+  // console.log(lat, lng);
   const mapContainer = useRef(null);
   const map = useRef<mapboxgl.Map | null>(null);
   const marker = useRef<mapboxgl.Marker | null>(null);
@@ -108,6 +108,7 @@ const MapComponent = ({
       marker.current?.setLngLat([longitude, latitude]);
     }
 
+    if()
     map.current.on("click", async (e) => {
       const { lat, lng } = e.lngLat;
       // console.log("Click coordinates:", lat, lng);
@@ -130,11 +131,11 @@ const MapComponent = ({
         city = currentCity;
 
         if (city !== undefined) {
-          console.log(`City found: ${city}, Country: ${country}`);
+          // console.log(`City found: ${city}, Country: ${country}`);
           passData(city, country);
           break; // Oprește bucla când city nu mai este undefined
         } else {
-          console.log(`City is still undefined. Attempt ${i + 1}`);
+          // console.log(`City is still undefined. Attempt ${i + 1}`);
         }
       }
     });
