@@ -25,6 +25,22 @@ export const formSchema = z
     }),
     lat: z.string(),
     lng: z.string(),
+    file: z
+      .custom<FileList>((v) => v instanceof FileList && v.length > 0, {
+        message: "A file is required.",
+      })
+      .refine((v) => v && v[0]?.size <= 5 * 1024 * 1024, {
+        message: "File must be less than 5MB",
+      })
+      .refine((file) => {
+        const allowedExtension = ['jpg', 'png', 'jpeg'];
+        const filename = file[0].name?.toLowerCase() || "";
+        console.log(file);
+
+        return allowedExtension.some(ext => filename.endsWith(ext))
+      }, {
+        message: "Only image files are allowed",
+      }),
   })
   .refine(
     (data) => {

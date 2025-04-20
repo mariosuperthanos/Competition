@@ -1,21 +1,33 @@
-import { ApolloServer } from '@apollo/server'
-import { startStandaloneServer } from '@apollo/server/standalone'
-import typeDefs from '../../../../graphUtils/graphqlSchema';
+import { ApolloServer } from '@apollo/server';
 import { startServerAndCreateNextHandler } from '@as-integrations/next';
+import typeDefs from '../../../../graphUtils/graphqlSchema';
 import prisma from '../../../../lib/prisma';
-import { PrismaClient } from '@prisma/client';
+import resolvers from '../../../../graphUtils/resolvers';
 
-export type Context = {
-  prisma: PrismaClient
-}
+// Eliminat importul nefolosit
+// import { startStandaloneServer } from '@apollo/server/standalone'
+// import { PrismaClient } from '@prisma/client'; - deja importat prin prisma
 
-const apolloServer = new ApolloServer<Context>({
-  // typedef
+const apolloServer = new ApolloServer({
   typeDefs,
-  // resolver
-  resolvers
+  resolvers,
+  // Context-ul se va transmite la handler, nu aici
 });
 
-export default startServerAndCreateNextHandler(apolloServer, {
-  context: async(req, res) => ({req, res, prisma}),
-})
+// Creează handler-ul cu contextul furnizat corect
+const handler = startServerAndCreateNextHandler(apolloServer, {
+  context: async (req) => {
+    return {
+      prisma, // Dacă ai autentificare implementată
+    };
+  },
+});
+
+export async function GET(request: Request) {
+  return handler(request);
+}
+
+// Adăugăm metoda POST care este esențială pentru GraphQL
+export async function POST(request: Request) {
+  return handler(request);
+}

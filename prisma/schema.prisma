@@ -25,7 +25,7 @@ model User {
 
 model Event {
   id          String @id @default(uuid())
-  title       String
+  title       String @unique
   hosts       User[] @relation("UserEvents")
   description String
   date        String
@@ -35,5 +35,6 @@ model Event {
   city        String
   lat         Float
   lng         Float
+  slug        String @unique
   // attendees   User[]   @relation("Attendees")
 }

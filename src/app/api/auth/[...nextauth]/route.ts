@@ -75,7 +75,7 @@ export const authOptions = {
           credentials.password,
           credentials.email
         );
-        
+
         if (getUser === undefined) {
           throw new Error("Could not log you in!");
         }
@@ -97,7 +97,7 @@ export const authOptions = {
       // store data in JWT token
       if (user) {
         token.name = user.name;
-        token.id = user.id; 
+        token.id = user.id;
         token.email = user.email;
       }
       return token;

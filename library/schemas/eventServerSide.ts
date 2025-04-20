@@ -14,6 +14,24 @@ const schema = Joi.object({
   city: Joi.string().required(),
   lat: Joi.number().required(),
   lng: Joi.number().required(),
+  file: Joi.any()
+    .meta({ type: 'file' })
+    .custom((value, helpers) => {
+      console.log('value:', value);
+      const allowedExtension = ['jpg', 'png', 'jpeg']; 
+      const file = value;
+      if (!file) {
+        return helpers.error('any.required');
+      }
+      if (!allowedExtension.some(ext => file.type.endsWith(ext))) {
+        return helpers.error('file.image');
+      }
+      if (file.size > 5 * 1024 * 1024) { // 5MB
+        return helpers.error('file.size');
+      }
+      return value; 
+    })
+    .required()
 });
 
 export default schema;

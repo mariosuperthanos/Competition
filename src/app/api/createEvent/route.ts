@@ -2,76 +2,50 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
 import Joi from "joi";
-import { use } from "react";
 import { getServerSession } from "next-auth";
 import { AuthOptions } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 import schema from "../../../../library/schemas/eventServerSide";
+import slugify from "slugify";
+import checkJWT from "../../../../library/create-eventAPI/checkJWT";
+import getData from "../../../../library/create-eventAPI/getData";
+import valdiateEventSchema from "../../../../library/create-eventAPI/validateSchema";
+import addEventInDB from "../../../../library/create-eventAPI/addEventDB";
+import path from "path";
+import { fileURLToPath } from "url";
+import { promises as fs } from "fs";
+import sharp from "sharp";
+import parseImage from "../../../../library/create-eventAPI/parseImage";
+import sharpImage from "../../../../library/create-eventAPI/sharpImage";
+import uploadFile from "../../../../library/create-eventAPI/addImageToS3";
+
+const uploadDir = path.join(process.cwd(), "tmp/uploads");
 
 export const POST = async (req: Request) => {
-  // validate the cookie by using next auth server side function
-  const cookie = await getServerSession(authOptions);
-
-  // const authHeader = req.headers.get('cookie');
-  // console.log("Authorization header:", authHeader);
-
-  // console.log(cookie);
-  if (!cookie) {
-    return NextResponse.json({ data: "You are not logged in." }, { status: 401 });
-  }
-
   try {
-    let {
-      title,
-      description,
-      date,
-      startHour,
-      finishHour,
-      country,
-      city,
-      lat,
-      lng,
-    } = await req.json();
+    const userid = await checkJWT();
 
-    const userid=cookie.token.id;
+    const data = await getData(req);
+    
+    const filePath = path.join(uploadDir, data.file?.name);
 
-    lat = parseFloat(lat);
-    lng = parseFloat(lng);
+    await parseImage(data, filePath);
+
+    const inputPath = filePath;
+    const outputPath = path.join(uploadDir, "outcome.jpeg");
+
+    await sharpImage(inputPath, outputPath);
 
     // validate the req body
-    await schema.validateAsync({
-      title,
-      description,
-      startHour,
-      date,
-      finishHour,
-      country,
-      city,
-      lat,
-      lng,
-    });
+    await valdiateEventSchema(data);
 
-    const hostsArray = [userid];
+    await uploadFile(outputPath, `${data.title}.jpeg`);
 
-    // add event in db
-    const addPost = await prisma.event.create({
-      data: {
-        title,
-        description,
-        date,
-        startHour,
-        finishHour,
-        country,
-        city,
-        lat,
-        lng,
-        hosts: {
-          connect: hostsArray.map((id) => ({ id })), // Conectează utilizatorii prin ID-uri
-        },
-      },
-    });
+    const addPost = await addEventInDB(data, userid);
+
     return NextResponse.json({ data: addPost }, { status: 200 });
   } catch (err) {
-    return NextResponse.json({ err }, { status: 500 });
+    console.log(err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 };

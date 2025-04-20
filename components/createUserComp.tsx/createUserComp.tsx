@@ -72,11 +72,18 @@ const CreateUserComp = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
+    console.log(values.startHour, values.date);
     try {
+      console.log(1);
       // it also verify JWT token
       const request = await axios.post(
         "http://localhost:3000/api/createEvent",
-        values
+        values,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
 
       if (request.status == 200) {
@@ -250,6 +257,11 @@ const CreateUserComp = () => {
                 <Input
                   placeholder="Enter country"
                   {...field}
+                  // this is an abstraction for
+                  // value={field.value}
+                  // onChange={field.onChange}
+                  // onBlur={field.onBlur}
+                  // name={field.name}
                   onChange={async (e) => {
                     field.onChange(e);
                     if (e.target.value.trim() === "") {
@@ -327,6 +339,25 @@ const CreateUserComp = () => {
           lng={lng}
           shouldRender={!firstTimeCity}
           settings={{ purpose: "interactive", passData: updateUIonClick }}
+        />
+        {/* File Upload Field */}
+        <FormField
+          control={form.control}
+          name="file"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Upload Image</FormLabel>
+              <FormControl>
+                <Input
+                  type="file"
+                  onChange={(e) => {
+                    field.onChange(e.target.files);
+                  }}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
         />
 
         {/* Submit Button */}
