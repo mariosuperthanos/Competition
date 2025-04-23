@@ -5,7 +5,10 @@ import { getServerSession } from "next-auth";
 import AuthProvider from "../../components/auth/AuthProvider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import NavBar from "../../components/navbar/NavBar";
+import saveTimezone from "../../library/getUserData.ts/saveTimezone";
 // import 'leaflet/dist/leaflet.css';
+import { cookies } from "next/headers";
+import CookieSetter from "../../components/CookieSetter";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -28,11 +31,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
+  const cookieStore = cookies();
+  const isCookie =
+    cookieStore.get("userLocation") == null ||
+    cookieStore.get("userLocation") == undefined
+      ? false
+      : true;
+
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
+        {!isCookie && (
+          <CookieSetter />
+        )}
         <div style={{ paddingTop: "13px", paddingLeft: "13px" }}>
           <NavBar />
         </div>

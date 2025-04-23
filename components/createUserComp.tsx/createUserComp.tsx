@@ -35,6 +35,8 @@ import "mapbox-gl/dist/mapbox-gl.css";
 import { timeToMinutes } from "../../library/converters/timeToMinutes";
 import { formSchema } from "../../library/schemas/create-event";
 import { useSession } from "next-auth/react";
+import formatData from "../../library/converters/formatData";
+import convertObjToForm from "../../library/converters/convertObjToForm";
 
 let firstTime = true;
 // if the country is not writted corect, then the county field wont be displayed
@@ -72,13 +74,23 @@ const CreateUserComp = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values.startHour, values.date);
+    const valuesCopy = { ...values };
+    console.log(values.file);
+    const formattedStartH = formatData(values.date.toString(), valuesCopy.startHour);
+    const formattedEndH = formatData(values.date.toString(), valuesCopy.finishHour);
+
+    valuesCopy.startHour = formattedStartH;
+    valuesCopy.finishHour = formattedEndH;
+  
+    const formData = convertObjToForm(valuesCopy);
+    console.log(formData.file);
+
     try {
       console.log(1);
       // it also verify JWT token
       const request = await axios.post(
         "http://localhost:3000/api/createEvent",
-        values,
+        formData,
         {
           headers: {
             "Content-Type": "multipart/form-data",
