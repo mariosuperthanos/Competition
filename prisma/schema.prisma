@@ -36,5 +36,6 @@ model Event {
   lat         Float
   lng         Float
   slug        String @unique
+  timezone    String
   // attendees   User[]   @relation("Attendees")
 }

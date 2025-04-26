@@ -109,7 +109,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
               <FormItem>
                 <FormLabel>Username</FormLabel>
                 <FormControl>
-                  <Input placeholder="shadcn" {...field} />
+                  <Input
+                    className="border-2 border-gray-300" // Lighter gray border
+                    placeholder="shadcn"
+                    {...field}
+                  />
                 </FormControl>
               </FormItem>
             )}
@@ -122,7 +126,11 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
             <FormItem>
               <FormLabel>Password</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input
+                  className="border-2 border-gray-300" // Lighter gray border
+                  placeholder="shadcn"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
@@ -131,26 +139,29 @@ const AuthForm: React.FC<AuthFormProps> = ({ mode }) => {
           control={form.control}
           name="email"
           render={({ field }) => (
-            // inline style have priority
             <FormItem
               className="space-y-2 mb-6"
               style={{ marginBottom: "1.25rem" }}
             >
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="shadcn" {...field} />
+                <Input
+                  className="border-2 border-gray-300" // Lighter gray border
+                  placeholder="shadcn"
+                  {...field}
+                />
               </FormControl>
             </FormItem>
           )}
         />
         {feedback !== "" && <p>{feedback}</p>}
-        <Button type="submit" className="mt-6">
+        <Button type="submit" className="mt-6 bg-black text-white">
           Submit
         </Button>
         {mode === "signUp" ? (
-          <Link href="/auth/login">Already have an account?</Link>
+          <Link href="/auth/login" className="ml-3">Already have an account?</Link>
         ) : (
-          <Link href="/auth/signup">Create new account</Link>
+          <Link href="/auth/signup" className="ml-3">Create new account</Link>
         )}
       </form>
     </Form>

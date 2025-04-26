@@ -6,7 +6,7 @@ import prisma from "../../lib/prisma";
 const checkJWT = async () => {
   // validate the cookie by using next auth server side function
   const cookie = await getServerSession(authOptions);
-  console.log(cookie)
+  console.log(cookie);
 
   if (!cookie) {
     throw new Error("You are not logged in.");
@@ -16,9 +16,10 @@ const checkJWT = async () => {
 
   const user = await prisma.user.findUnique({
     where: {
-      id
-    }
-  })
+      id,
+    },
+  });
+  console.log(user);
 
   if (!user) {
     throw new Error("You are not logged in.");

@@ -1,8 +1,11 @@
+@import "@radix-ui/themes/styles.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
+
+/* body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
@@ -69,4 +72,4 @@ body {
   body {
     @apply bg-background text-foreground;
   }
-}
+} */

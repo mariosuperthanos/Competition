@@ -37,6 +37,20 @@ import { formSchema } from "../../library/schemas/create-event";
 import { useSession } from "next-auth/react";
 import formatData from "../../library/converters/formatData";
 import convertObjToForm from "../../library/converters/convertObjToForm";
+import getTimeZone from "../../library/converters/getTimeZone";
+import { useRef } from "react";
+
+
+import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import dayjs from 'dayjs';
+
+import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
+import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
+import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
+
 
 let firstTime = true;
 // if the country is not writted corect, then the county field wont be displayed
@@ -60,14 +74,17 @@ const CreateUserComp = () => {
     },
   });
 
+
   // function that tells if the data from interactive map is OK
   // This function is getting passed into the MapComponent(it sends the data back)
-  const updateUIonClick = (city: string, country: string) => {
+  const updateUIonClick = (city: string, country: string, lat: string, lng: string) => {
     console.log(city, country);
     if (city !== undefined) {
       form.setValue("city", removeDiacritics(city));
       form.clearErrors(`city`);
       form.setValue("map", true);
+      form.setValue("lat", lat.toString());
+      form.setValue("lng", lng.toString());
     }
     form.setValue("country", removeDiacritics(country));
     form.clearErrors(`country`);
@@ -79,9 +96,12 @@ const CreateUserComp = () => {
     const formattedStartH = formatData(values.date.toString(), valuesCopy.startHour);
     const formattedEndH = formatData(values.date.toString(), valuesCopy.finishHour);
 
+    const timezone = await getTimeZone(parseFloat(values.lat), parseFloat(values.lng));
+
     valuesCopy.startHour = formattedStartH;
     valuesCopy.finishHour = formattedEndH;
-  
+    valuesCopy.timezone = timezone;
+
     const formData = convertObjToForm(valuesCopy);
     console.log(formData.file);
 
@@ -98,6 +118,8 @@ const CreateUserComp = () => {
         }
       );
 
+      console.log(request);
+
       if (request.status == 200) {
         console.log("success");
       }
@@ -113,8 +135,8 @@ const CreateUserComp = () => {
         mode === "country"
           ? `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()}&key=1815f05342614d459cd09ea741dcfc58`
           : `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()},${form.getValues(
-              "country"
-            )}&key=1815f05342614d459cd09ea741dcfc58`;
+            "country"
+          )}&key=1815f05342614d459cd09ea741dcfc58`;
 
       const req = await axios.get(REQ_URL);
       const data =
@@ -153,232 +175,281 @@ const CreateUserComp = () => {
   // console.log(lat, lng)
 
   return (
-    <Form {...form}>
-      <form
-        onSubmit={form.handleSubmit(onSubmit)}
-        className="max-w-md w-full bg-white p-6 rounded-lg shadow-md"
-      >
-        {/* Title Field */}
-        <FormField
-          control={form.control}
-          name="title"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Title</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter title" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Description Field */}
-        <FormField
-          control={form.control}
-          name="description"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Description</FormLabel>
-              <FormControl>
-                <Input placeholder="Enter description" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Date Field */}
-        <FormField
-          control={form.control}
-          name="date"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>Date</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-[240px] justify-start text-left font-normal",
-                        !field.value && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {field.value ? (
-                        format(field.value, "PPP")
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Start Hour Field */}
-        <FormField
-          control={form.control}
-          name="startHour"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Start Hour</FormLabel>
-              <FormControl>
-                <TimePicker value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Finish Hour Field */}
-        <FormField
-          control={form.control}
-          name="finishHour"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Finish Hour</FormLabel>
-              <FormControl>
-                <TimePicker value={field.value} onChange={field.onChange} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        {/* Country Field */}
-        <FormField
-          control={form.control}
-          name="country"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Country</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder="Enter country"
-                  {...field}
-                  // this is an abstraction for
-                  // value={field.value}
-                  // onChange={field.onChange}
-                  // onBlur={field.onBlur}
-                  // name={field.name}
-                  onChange={async (e) => {
-                    field.onChange(e);
-                    if (e.target.value.trim() === "") {
-                      form.setError("country", {
-                        type: "manual",
-                        message: "This field is required",
-                      });
-                      return;
-                    }
-                    const validationResult = await validate(
-                      e.target.value,
-                      "country"
-                    );
-                    if (validationResult !== true) {
-                      form.setError("country", {
-                        type: "manual",
-                        message: "This country does not exist",
-                      });
-                    }
-                  }}
-                />
-              </FormControl>
-              <FormMessage>
-                {form.formState.errors?.country?.message}
-              </FormMessage>
-            </FormItem>
-          )}
-        />
-
-        {/* City Field */}
-        {firstTime === false && (
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <Form {...form}>
+        <form
+          onSubmit={form.handleSubmit(onSubmit)}
+          className="max-w-md w-full bg-white p-6 rounded-lg shadow-md"
+        >
+          {/* Title Field */}
           <FormField
             control={form.control}
-            name="city"
+            name="title"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>City</FormLabel>
+                <FormLabel>Title</FormLabel>
                 <FormControl>
-                  <Input
-                    placeholder="Enter city"
-                    {...field}
-                    onChange={async (e) => {
-                      field.onChange(e);
-                      if (e.target.value.trim() === "") {
-                        form.setError("city", {
-                          type: "manual",
-                          message: "This field is required",
-                        });
-                        return;
-                      }
-                      const validationResult = await validate(
-                        e.target.value,
-                        "city"
-                      );
-                      if (validationResult !== true) {
-                        form.setError("city", {
-                          type: "manual",
-                          message: "This city does not exist",
-                        });
-                      }
-                    }}
-                  />
+                  <Input className="border-2 border-gray-300" placeholder="Enter title" {...field} />
                 </FormControl>
-                <FormMessage>
-                  {form.formState.errors?.city?.message}
-                </FormMessage>
+                <FormMessage />
               </FormItem>
             )}
           />
-        )}
-        {/* Map Field */}
-        <MapComponent
-          key={"gagga"}
-          lat={lat}
-          lng={lng}
-          shouldRender={!firstTimeCity}
-          settings={{ purpose: "interactive", passData: updateUIonClick }}
-        />
-        {/* File Upload Field */}
-        <FormField
-          control={form.control}
-          name="file"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Upload Image</FormLabel>
-              <FormControl>
-                <Input
-                  type="file"
-                  onChange={(e) => {
-                    field.onChange(e.target.files);
-                  }}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+          <div className="p-1"> </div>
 
-        {/* Submit Button */}
-        <Button type="submit" style={{ marginTop: "55px" }}>
-          Submit
-        </Button>
-      </form>
-    </Form>
-  );
+          {/* Description Field */}
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Description</FormLabel>
+                <FormControl>
+                  <Input className="border-2 border-gray-300" placeholder="Enter description" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="p-1"> </div>
+
+          {/* Date Field */}
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date</FormLabel>
+                <FormControl>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['DatePicker']}>
+                      <DatePicker
+                        value={field.value ? dayjs(field.value) : null} // convertim Date -> Dayjs ca să înțeleagă DatePicker
+                        onChange={(newValue) => {
+                          const dateValue = newValue ? newValue.toDate() : null; // convertim Dayjs -> Date
+                          field.onChange(dateValue);
+                        }}
+                        slotProps={{
+                          textField: {
+                            className: "w-60",
+                            error: !!form.formState.errors.date,
+                            helperText: form.formState.errors.date?.message,
+                          }
+                        }}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <div className="p-1"> </div>
+
+          {/* Start Hour Field */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <FormField
+              control={form.control}
+              name="startHour"
+              render={({ field }) => (
+                <FormItem className="flex flex-col space-y-2">
+                  <FormLabel>Start Hour</FormLabel>
+                  <FormControl>
+                    <DesktopTimePicker
+                      value={field.value ? dayjs(field.value, "HH:mm A") : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedTime = date.format("hh:mm A"); // ex: "03:45 PM"
+                          field.onChange(formattedTime);
+                        } else {
+                          field.onChange("");
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </LocalizationProvider>
+
+          <div className="p-1"> </div>
+
+          {/* Finish Hour Field */}
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <FormField
+              control={form.control}
+              name="finishHour"
+              render={({ field }) => (
+                <FormItem className="flex flex-col space-y-2">
+                  <FormLabel>Finish Hour</FormLabel>
+                  <FormControl>
+                    <DesktopTimePicker
+                      value={field.value ? dayjs(field.value, "hh:mm A") : null}
+                      onChange={(date) => {
+                        if (date) {
+                          const formattedTime = date.format("hh:mm A"); // ex: "03:45 PM"
+                          field.onChange(formattedTime);
+                        } else {
+                          field.onChange("");
+                        }
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </LocalizationProvider>
+
+
+
+          {/* Country Field */}
+          <FormField
+            control={form.control}
+            name="country"
+            render={({ field }) => {
+              const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+              return (
+                <FormItem>
+                  <FormLabel>Country</FormLabel>
+                  <FormControl>
+                    <Input className="border-2 border-gray-300"
+                      placeholder="Enter country"
+                      {...field}
+                      onChange={(e) => {
+                        field.onChange(e);
+
+                        if (debounceTimeout.current) {
+                          clearTimeout(debounceTimeout.current);
+                        }
+
+                        debounceTimeout.current = setTimeout(async () => {
+                          if (e.target.value.trim() === "") {
+                            form.setError("country", {
+                              type: "manual",
+                              message: "This field is required",
+                            });
+                            return;
+                          }
+                          console.log(e.target.value);
+
+                          const validationResult = await validate(
+                            e.target.value,
+                            "country"
+                          );
+                          if (validationResult !== true) {
+                            form.setError("country", {
+                              type: "manual",
+                              message: "This country does not exist",
+                            });
+                          }
+                        }, 600); // 600 ms debounce
+                      }}
+                    />
+                  </FormControl>
+                  <FormMessage>
+                    {form.formState.errors?.country?.message}
+                  </FormMessage>
+                </FormItem>
+              );
+            }}
+          />
+
+
+          {/* City Field */}
+          {firstTime === false && (
+            <FormField
+              control={form.control}
+              name="city"
+              render={({ field }) => {
+                const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
+                return (
+                  <FormItem>
+                    <FormLabel>City</FormLabel>
+                    <FormControl>
+                      <Input className="border-2 border-gray-300"
+                        placeholder="Enter city"
+                        {...field}
+                        onChange={(e) => {
+                          field.onChange(e);
+
+                          if (debounceTimeout.current) {
+                            clearTimeout(debounceTimeout.current);
+                          }
+
+                          debounceTimeout.current = setTimeout(async () => {
+                            if (e.target.value.trim() === "") {
+                              form.setError("city", {
+                                type: "manual",
+                                message: "This field is required",
+                              });
+                              return;
+                            }
+                            console.log(e.target.value);
+
+                            const validationResult = await validate(
+                              e.target.value,
+                              "city"
+                            );
+                            if (validationResult !== true) {
+                              form.setError("city", {
+                                type: "manual",
+                                message: "This city does not exist",
+                              });
+                            }
+                          }, 600); // 600 ms debounce
+                        }}
+                      />
+                    </FormControl>
+                    <FormMessage>
+                      {form.formState.errors?.city?.message}
+                    </FormMessage>
+                  </FormItem>
+                );
+              }}
+            />
+          )}
+
+          {/* Map Field */}
+          <MapComponent
+            key={"gagga"}
+            lat={lat}
+            lng={lng}
+            shouldRender={!firstTimeCity}
+            settings={{ purpose: "interactive", passData: updateUIonClick }}
+          />
+          {/* File Upload Field */}
+          <FormField
+            control={form.control}
+            name="file"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Upload Image</FormLabel>
+                <FormControl>
+                  <Input className="border-2 border-gray-300"
+                    type="file"
+                    onChange={(e) => {
+                      field.onChange(e.target.files);
+                    }}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Submit Button */}
+          <Button type="submit" className="mt-6 bg-black text-white">
+            Submit
+          </Button>
+
+        </form>
+      </Form>
+    </div>
+  )
 };
 
 export default CreateUserComp;

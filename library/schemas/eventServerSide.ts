@@ -31,7 +31,8 @@ const schema = Joi.object({
       }
       return value; 
     })
-    .required()
+    .required(),
+  timezone: Joi.string().required(),
 });
 
 export default schema;

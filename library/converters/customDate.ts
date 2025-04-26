@@ -1,7 +1,11 @@
+"use client";
+
+import Cookies from "js-cookie";
+import { DateTime } from "luxon";
+
 interface Time {
-  date: string;       // Dată în format ISO (e.g., "2025-03-14T09:00:00Z")
-  startHour: string;  // Ora de început în format "HH:MM AM/PM"
-  endHour: string;    // Ora de sfârșit în format "HH:MM AM/PM"
+  startHour: string;
+  endHour: string;
 }
 
 // const formatEventDate = (time: Time): string => {
@@ -38,19 +42,74 @@ interface Time {
 //   return `${formattedDate} ${formattedStartTime} to ${formattedEndTime} CET`;
 // };
 
-const formatEventDate = (time: Time): string => {
-  const dateOnly = time.date.split('T')[0];
-  const startDateTime = new Date(dateOnly);
-  
-  const optionsDate: Intl.DateTimeFormatOptions = { 
-    weekday: 'long', 
-    year: 'numeric', 
-    month: 'long', 
-    day: 'numeric'
+const formatEventDate = (
+  time: Time,
+  country: string,
+  city: string,
+  timezone: string,
+  userTimezone: string
+): object => {
+  const result = {
+    date: "",
+    startHour: "",
+    endHour: "",
   };
-  
-  const formattedDate = startDateTime.toLocaleDateString('en-US', optionsDate);
-  return formattedDate;
+  // const {
+  //   data: { userTimezone },
+  // } = JSON.parse(Cookies.get("timezoneData"));
+
+  const startHourClient = DateTime.fromISO(time.startHour, { zone: "utc" })
+    .setZone(userTimezone)
+    .toFormat("hh:mm a");
+  const endHourClient = DateTime.fromISO(time.endHour, { zone: "utc" })
+    .setZone(userTimezone)
+    .toFormat("hh:mm a");
+  const startHourEvent = DateTime.fromISO(time.startHour, { zone: "utc" })
+    .setZone(timezone)
+    .toFormat("hh:mm a");
+  const endHourEvent = DateTime.fromISO(time.endHour, { zone: "utc" })
+    .setZone(timezone)
+    .toFormat("hh:mm a");
+  // verify if the event and the user are in the same time zone
+  if (startHourClient === startHourEvent) {
+    const date = new Date(time.startHour);
+
+    const formattedDate = date.toLocaleString("en-US", {
+      timeZone: timezone, // Europe/Bucharest timezone
+      weekday: "long", // Full day name
+      year: "numeric", // Full year
+      month: "long", // Full month name
+      day: "numeric", // Day of the month
+    });
+
+    result.date = formattedDate + "(the event is in the same timezone as you)";
+    result.startHour = startHourClient;
+    result.endHour = endHourClient;
+  } else {
+    result.startHour = `${startHourEvent} in ${country}, ${city}(= ${startHourClient} in your location)`;
+    result.endHour = `${endHourEvent} in ${country}, ${city}(= ${endHourClient} in your location)`;
+    const date = new Date(time.startHour);
+    const formattedDateEvent = date.toLocaleString("en-US", {
+      timeZone: timezone, // Europe/Bucharest timezone
+      weekday: "long", // Full day name
+      year: "numeric", // Full year
+      month: "long", // Full month name
+      day: "numeric", // Day of the month
+    });
+    const formattedDateClient = date.toLocaleString("en-US", {
+      timeZone: userTimezone, // Europe/Bucharest timezone
+      weekday: "long", // Full day name
+      year: "numeric", // Full year
+      month: "long", // Full month name
+      day: "numeric", // Day of he month
+    });
+    if (formattedDateClient === formattedDateEvent) {
+      result.date = formattedDateClient;
+    } else {
+      result.date = `${formattedDateEvent} in ${country}, ${city}(= ${formattedDateClient} in your location)`;
+    }
+  }
+  return result;
 };
 
 export default formatEventDate;

@@ -12,27 +12,39 @@ import dynamic from "next/dynamic";
 import { Fragment } from "react";
 import MapComponent from "./Map";
 import formatEventDate from "../../library/converters/customDate";
+import Cookies from "js-cookie";
 
 interface TimeAndLocationProps {
   time: {
-    date: string;
     startHour: string;
     endHour: string;
   };
   location: {
+    timezone: string;
+    country: string;
+    city: string;
     lat: string;
     lng: string;
   };
+  timezone: string;
 }
 
 export default function TimeAndLocationCard({
   time,
   location,
+  timezone
 }: TimeAndLocationProps) {
   const Map = dynamic(() => import("./Map"), {
     ssr: false, // Dezactivează server-side rendering
   });
-  const formattedString = formatEventDate(time);
+
+  const { date, startHour, endHour } = formatEventDate(
+    time,
+    location.country,
+    location.city,
+    location.timezone,
+    timezone,
+  );
 
   return (
     <Fragment>
@@ -46,13 +58,13 @@ export default function TimeAndLocationCard({
           </CardTitle>
           <CardContent className="space-y-2">
             <p>
-              <strong>Date:</strong> {formattedString}
+              <strong>Date:</strong> {date}
             </p>
             <p>
-              <strong>Start Time:</strong> {time.startHour}
+              <strong>Start Time:</strong> {startHour}
             </p>
             <p>
-              <strong>End Time:</strong> {time.endHour}
+              <strong>End Time:</strong> {endHour}
             </p>
             <p>
               <strong>Location:</strong> Latitude: {location.lat}, Longitude:{" "}

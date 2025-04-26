@@ -2,12 +2,12 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 import CreateUserComp from "../../../components/createUserComp.tsx/createUserComp";
+import checkJWT from "../../../library/create-eventAPI/checkJWT";
 
 const CreateEventPage = async () => {
-  const session = await getServerSession(authOptions);
-  console.log(session);
-
-  if (!session) {
+  try {
+    await checkJWT();
+  } catch (err) {
     return redirect("/auth/login");
   }
 

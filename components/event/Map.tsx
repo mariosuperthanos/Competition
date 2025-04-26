@@ -1,56 +1,3 @@
-// import React, { useEffect, useRef } from "react";
-// import mapboxgl from "mapbox-gl";
-// import { parse } from "path";
-// import 'mapbox-gl/dist/mapbox-gl.css';
-
-// const MapComponent = ({ lat, lng, shouldRender }: { lat: string; lng: string; shouldRender: boolean }) => {
-//   console.log(lat, lng);
-//   const latitude = parseFloat(lat);
-//   const longitudine = parseFloat(lng);
-//   const mapContainer = useRef(null);
-//   const map = useRef(null);
-
-//   useEffect(() => {
-//     // Initialize map only once
-//     if (map.current) return;
-
-//     mapboxgl.accessToken =
-//       "pk.eyJ1IjoiY3Jvbm9zcmVhcGVyIiwiYSI6ImNtNm1udWt2dTBocDAya3NtemJic2F5NmoifQ.LT4dGB9RjShlozhmAVzm-w";
-
-//     map.current = new mapboxgl.Map({
-//       container: mapContainer.current,
-//       style: "mapbox://styles/mapbox/streets-v11",
-//       center: [latitude, longitudine], // Bucharest coordinates
-//       zoom: 12,
-//     });
-
-//     // Cleanup function
-//     return () => map.current?.remove();
-//   }, []);
-
-//   return (
-//     <div
-//       style={{
-//         width: "50%",
-//         height: "200px",
-//         position: "relative",
-//         paddingLeft: "20px",
-//         paddingTop: "50px",
-//         marginTop: '20px',
-//         marginLeft: '20px',
-//         display: shouldRender ? 'block' : 'none',
-//       }}
-//     >
-//       <div
-//         ref={mapContainer}
-//         style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-//       />
-//     </div>
-//   );
-// };
-
-// export default MapComponent;
-
 import React, { useEffect, useRef, useState } from "react";
 import mapboxgl from "mapbox-gl";
 import "mapbox-gl/dist/mapbox-gl.css";
@@ -142,7 +89,7 @@ const MapComponent = ({
 
           if (city !== undefined) {
             // console.log(`City found: ${city}, Country: ${country}`);
-            settings.passData(city, country);
+            settings.passData(city, country, lat, lng);
             break; // Oprește bucla când city nu mai este undefined
           } else {
             // console.log(`City is still undefined. Attempt ${i + 1}`);
@@ -168,7 +115,7 @@ const MapComponent = ({
         marker.current = null;
       }
     };
-  }, [lat, lng]); // Dependențe actualizate
+  }, [shouldRender]); // Dependențe actualizate
 
   return (
     <div

@@ -1,6 +1,5 @@
 import { Context } from "@/app/api/graphql/route";
 
-
 const resolvers = {
   Query: {
     // the argument is the title: outside-concert
@@ -21,6 +20,61 @@ const resolvers = {
       }
 
       return event;
+    },
+    events: async (_parent: any, args: any, context: Context) => {
+      const contains = args.contains || "";
+      const city = args.city || "";
+      const country = args.country || "";
+      const date = args.date || ""; // it expects a date string in the format YYYY-MM-DD
+
+      const filters: any[] = [];
+
+      if (contains) {
+        filters.push({
+          title: {
+            contains: contains,
+            mode: "insensitive", // ignore uppercase/lowercase
+          },
+        });
+      }
+
+      if (city) {
+        filters.push({
+          city: {
+            equals: city,
+            mode: "insensitive", // ignore uppercase/lowercase
+          },
+        });
+      }
+
+      if (country) {
+        filters.push({
+          country: {
+            equals: country,
+            mode: "insensitive", // ignore uppercase/lowercase
+          },
+        });
+      }
+
+      if (date) {
+        filters.push({
+          startHour: {
+            startsWith: date, // Matches the date part of the startHour field
+          },
+        });
+      }
+
+      const events = await context.prisma.event.findMany({
+        where: {
+          AND: filters,
+        },
+      });
+
+      if (!events || events.length === 0) {
+        throw new Error("No events found");
+      }
+
+      return events;
     },
   },
 };

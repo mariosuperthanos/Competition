@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import './globals.css'
 import { getServerSession } from "next-auth";
 import AuthProvider from "../../components/auth/AuthProvider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
@@ -9,6 +9,8 @@ import saveTimezone from "../../library/getUserData.ts/saveTimezone";
 // import 'leaflet/dist/leaflet.css';
 import { cookies } from "next/headers";
 import CookieSetter from "../../components/CookieSetter";
+import { Suspense } from "react";
+import LayoutContent from "../../components/LayoutContent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,25 +33,27 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   const session = await getServerSession(authOptions);
-  const cookieStore = cookies();
+  const cookieStore = await cookies();
   const isCookie =
-    cookieStore.get("userLocation") == null ||
-    cookieStore.get("userLocation") == undefined
+    cookieStore.get("timezoneData") == null ||
+    cookieStore.get("timezoneData") == undefined
       ? false
       : true;
+  console.log('isCookie', isCookie);
 
   return (
     <html lang="en">
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {!isCookie && (
-          <CookieSetter />
-        )}
-        <div style={{ paddingTop: "13px", paddingLeft: "13px" }}>
-          <NavBar />
-        </div>
-        <AuthProvider session={session}>{children}</AuthProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <LayoutContent 
+            session={session} 
+            initialCookieState={isCookie}
+          >
+            {children}
+          </LayoutContent>
+        </Suspense>
       </body>
     </html>
   );

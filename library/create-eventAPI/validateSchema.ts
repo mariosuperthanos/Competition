@@ -12,7 +12,8 @@ const valdiateEventSchema = async (data) => {
     city: data.city,
     lat: data.lat,
     lng: data.lng,
-    file: data.file
+    file: data.file,
+    timezone: data.timezone
   });
 };
 

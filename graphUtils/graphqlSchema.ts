@@ -24,6 +24,7 @@ const typeDefs = gql`
   }
   type Query{
     event(slug: String!): Event!
+    events(contains: String, city: String, country: String, date: String): [Event!]!
   }
 `
 export default typeDefs;

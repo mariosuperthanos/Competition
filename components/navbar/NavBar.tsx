@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 function NavBar() {
   const [isLoggedIn, setIsLoggedIn] = React.useState(false);
-  
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 pt-5">
       <div className="container flex h-14 items-center justify-between">
@@ -23,18 +23,18 @@ function NavBar() {
           <span className="font-bold">ACME Events</span>
         </Link>
         <nav className="flex items-center space-x-4">
-          <Button variant="ghost" asChild>
-            <Link href="/join-event">Join Event</Link>
+          <Button variant="ghost" asChild className="border border-black hover:bg-black hover:text-white">
+            <Link href="/search-events">Join Event</Link>
           </Button>
-          <Button variant="ghost" asChild>
+          <Button variant="ghost" asChild className="border border-black hover:bg-black hover:text-white">
             <Link href="/create-event">Create Event</Link>
           </Button>
           {!isLoggedIn ? (
             <>
-              <Button variant="ghost" asChild>
+              <Button variant="ghost" asChild className="border border-black hover:bg-black hover:text-white">
                 <Link href="/auth/login">Login</Link>
               </Button>
-              <Button variant="default" asChild>
+              <Button variant="default" asChild className="border border-black hover:bg-black hover:text-white">
                 <Link href="/auth/signup">Sign Up</Link>
               </Button>
             </>

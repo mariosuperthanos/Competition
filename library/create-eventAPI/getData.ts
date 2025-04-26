@@ -14,6 +14,7 @@ const getData = async (req: Request) => {
     lat: parseFloat(formData.get("lat") as string),
     lng: parseFloat(formData.get("lng") as string),
     file: formData.get("file") as File | null,
+    timezone: formData.get("timezone") as string,
   };
 };
 

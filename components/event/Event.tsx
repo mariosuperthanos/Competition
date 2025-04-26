@@ -12,12 +12,17 @@ interface PageProps {
   title: string;
   description: string;
   time: {
-    date: string;
     startHour: string;
     endHour: string;
   };
   host: string;
-  location: { lat: string; lng: string };
+  location: {
+    timezone: string;
+    country: string;
+    city: string;
+    lat: string;
+    lng: string;
+  };
   image: string;
 }
 
@@ -28,6 +33,7 @@ export default async function Event({
   host,
   location,
   image,
+  timezone
 }: PageProps) {
   
   const cardStyle = {
@@ -54,7 +60,7 @@ export default async function Event({
           <p>Join us for an exciting learning experience!</p>
         </CardFooter>
       </Card>
-      <TimeAndLocationCard time={time} location={location} />
+      <TimeAndLocationCard time={time} location={location} timezone={timezone} />
     </div>
   );
   

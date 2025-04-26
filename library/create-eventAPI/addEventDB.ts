@@ -24,6 +24,7 @@ const addEventInDB = async (data, userid) => {
         connect: hostsArray.map((id) => ({ id })), // Conectează utilizatorii prin ID-uri
       },
       slug: slug,
+      timezone: data.timezone
     },
   });
   
