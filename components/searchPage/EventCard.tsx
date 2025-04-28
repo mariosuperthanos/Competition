@@ -8,7 +8,16 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
-const EventCard = ({ title, image, country, city, description, startHour }) => {
+export interface EventCardProps {
+  title: string;
+  image: string;
+  country: string;
+  city: string;
+  description: string;
+  startHour: string;
+}
+
+const EventCard: React.FC<EventCardProps> = ({ title, image, country, city, description, startHour }) => {
   return (
     <Card className="w-[730px] p-6 relative max-h-52 overflow-hidden rounded-md shadow-md">
       <div className="flex gap-4">

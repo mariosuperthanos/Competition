@@ -71,6 +71,7 @@ const CreateUserComp = () => {
       map: false,
       lat: "40",
       lng: "26",
+      timezone: "",
     },
   });
 

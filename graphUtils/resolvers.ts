@@ -22,6 +22,7 @@ const resolvers = {
       return event;
     },
     events: async (_parent: any, args: any, context: Context) => {
+      console.log("args", args);
       const contains = args.contains || "";
       const city = args.city || "";
       const country = args.country || "";

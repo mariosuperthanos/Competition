@@ -1,17 +1,18 @@
 services:
   app:
-    image: competition:myImage
-    build: 
+    image: app-web:first
+    build:
       context: .
     ports:
       - "3000:3000"
-    volumes:
-      - /mnt/d/recap/nume-aplicatie:/app
-      - node_modules:/app/node_modules  # Adăugăm volumul anonim pentru node_modules
     networks:
       - app-network
     depends_on:
       - db
+    environment:
+      DATABASE_URL: "postgresql://postgres:parola123@db:5432/recap?schema=public"
+      NEXTAUTH_SECRET: "jfsdghjhghjsghsjdgjfhljgshdjgjfdshgjd"
+      NEXTAUTH_URL: "http://localhost:3000"
   db:
     image: postgres:latest
     environment:
@@ -19,12 +20,9 @@ services:
       POSTGRES_PASSWORD: parola123
       POSTGRES_DB: recap
     ports:
-      - "1234:5432"
+      - "5432:5432"
     networks:
       - app-network
-
-volumes:
-  node_modules:  # Definim volumul anonim pentru node_modules
 
 networks:
   app-network:

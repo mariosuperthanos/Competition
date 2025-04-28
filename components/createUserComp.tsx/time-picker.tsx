@@ -5,7 +5,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Toggle } from "@/components/ui/toggle"
 
 
-function TimePicker({ value, onChange }) {
+interface TimePickerProps {
+  value: string;
+  onChange: (time: string) => void;
+}
+
+function TimePicker({ value, onChange }: TimePickerProps) {
   const [hour, setHour] = useState<string>("12");
   const [minute, setMinute] = useState<string>("00");
   const [isPM, setIsPM] = useState<boolean>(false);
@@ -13,7 +18,13 @@ function TimePicker({ value, onChange }) {
   const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, "0"));
   const minutes = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0"));
 
-  const handleTimeChange = (newHour, newMinute, newIsPM) => {
+  interface HandleTimeChangeParams {
+    newHour: string;
+    newMinute: string;
+    newIsPM: boolean;
+  }
+
+  const handleTimeChange = ({ newHour, newMinute, newIsPM }: HandleTimeChangeParams): void => {
     const timeString = `${newHour}:${newMinute} ${newIsPM ? "PM" : "AM"}`;
     onChange(timeString);
   };
@@ -24,7 +35,7 @@ function TimePicker({ value, onChange }) {
         value={hour}
         onValueChange={(newHour) => {
           setHour(newHour);
-          handleTimeChange(newHour, minute, isPM);
+          handleTimeChange({ newHour, newMinute: minute, newIsPM: isPM });
         }}
       >
         <SelectTrigger className="w-[70px]">
@@ -43,7 +54,7 @@ function TimePicker({ value, onChange }) {
         value={minute}
         onValueChange={(newMinute) => {
           setMinute(newMinute);
-          handleTimeChange(hour, newMinute, isPM);
+          handleTimeChange({ newHour: hour, newMinute, newIsPM: isPM });
         }}
       >
         <SelectTrigger className="w-[70px]">
@@ -61,7 +72,7 @@ function TimePicker({ value, onChange }) {
         pressed={isPM}
         onPressedChange={(newIsPM) => {
           setIsPM(newIsPM);
-          handleTimeChange(hour, minute, newIsPM);
+          handleTimeChange({ newHour: hour, newMinute: minute, newIsPM });
         }}
         aria-label="Toggle AM/PM"
         className="w-[70px]"

@@ -24,6 +24,9 @@ import axios from "axios";
 // create account on server side
 export const POST = async (req: Request | null) => {
   try {
+    if (!req) {
+      return NextResponse.json({ error: "Request is null" }, { status: 400 });
+    }
     const { username, password, email } = await req.json();
 
     const userResponse = await createUser(username, email, password);

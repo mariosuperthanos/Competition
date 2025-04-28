@@ -55,7 +55,7 @@ const MapComponent = ({
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
         style: "mapbox://styles/mapbox/streets-v11",
-        center: [longitude, latitude], // Notă: Mapbox folosește [lng, lat]
+        center: [longitude, latitude],
         zoom: 12,
       });
 
@@ -84,15 +84,18 @@ const MapComponent = ({
 
         // a loop that runs 10 times and make more calls to API if the results are still undefined
         for (let i = 0; i < 10; i++) {
-          const { city: currentCity, country } = await getLocation(lat, lng);
-          city = currentCity;
+          const location = await getLocation(lat, lng);
+          if (location) {
+            const { city: currentCity, country } = location;
+            city = currentCity;
 
-          if (city !== undefined) {
-            // console.log(`City found: ${city}, Country: ${country}`);
-            settings.passData(city, country, lat, lng);
-            break; // Oprește bucla când city nu mai este undefined
-          } else {
-            // console.log(`City is still undefined. Attempt ${i + 1}`);
+            if (city !== undefined) {
+              // console.log(`City found: ${city}, Country: ${country}`);
+              settings.passData(city, country, lat, lng);
+              break;
+            } else {
+              // console.log(`City is still undefined. Attempt ${i + 1}`);
+            }
           }
         }
       });
@@ -115,7 +118,7 @@ const MapComponent = ({
         marker.current = null;
       }
     };
-  }, [shouldRender]); // Dependențe actualizate
+  }, [shouldRender]);
 
   return (
     <div

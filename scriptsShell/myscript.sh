@@ -11,7 +11,7 @@ docker run -d \
   -e POSTGRES_USER=postgres \
   -e POSTGRES_PASSWORD=parola123 \
   -e POSTGRES_DB=recap \
-  -p 1234:5432 \
+  -p 5432:5432 \
   -v pgdata:/var/lib/postgresql/data \
   postgres:latest
 

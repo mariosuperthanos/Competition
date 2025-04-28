@@ -2,11 +2,24 @@ import slugify from "slugify";
 import prisma from "../../lib/prisma";
 import { error } from "console";
 
-const addEventInDB = async (data, userid) => {
+interface EventData {
+  title: string;
+  description: string;
+  date: string;
+  startHour: string;
+  finishHour: string;
+  country: string;
+  city: string;
+  lat: number;
+  lng: number;
+  timezone: string;
+}
+
+const addEventInDB = async (data: EventData, userid: string): Promise<any> => {
   // slug is not validated by schema, because it has nothing to do with the user's input, unlike the title that has to be unique
   const slug = slugify(data.title, { lower: true, strict: true });
 
-  const hostsArray = [userid];
+  const hostsArray: string[] = [userid];
 
   // add event in db
   const addPost = await prisma.event.create({

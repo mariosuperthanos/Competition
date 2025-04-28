@@ -35,7 +35,7 @@ export default function TimeAndLocationCard({
   timezone
 }: TimeAndLocationProps) {
   const Map = dynamic(() => import("./Map"), {
-    ssr: false, // Dezactivează server-side rendering
+    ssr: false,
   });
 
   const { date, startHour, endHour } = formatEventDate(

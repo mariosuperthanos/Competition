@@ -9,10 +9,19 @@ const s3 = new S3Client({
   },
 });
 
-const uploadFile = async (filePath, fileName) => {
-  const fileContent = readFileSync(filePath);
+interface UploadFileParams {
+  filePath: string;
+  fileName: string;
+}
 
-  const uploadParams = {
+const uploadFile = async (filePath: string, fileName: string): Promise<void> => {
+  const fileContent: Buffer = readFileSync(filePath);
+
+  const uploadParams: {
+    Bucket: string;
+    Key: string;
+    Body: Buffer;
+  } = {
     Bucket: "events-photos-recap-project",
     Key: fileName,
     Body: fileContent,

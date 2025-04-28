@@ -24,6 +24,7 @@ interface PageProps {
     lng: string;
   };
   image: string;
+  timezone: string;
 }
 
 export default async function Event({

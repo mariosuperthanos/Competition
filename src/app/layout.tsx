@@ -11,6 +11,7 @@ import { cookies } from "next/headers";
 import CookieSetter from "../../components/CookieSetter";
 import { Suspense } from "react";
 import LayoutContent from "../../components/LayoutContent";
+import QueryProvider from "../../components/QueryProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,7 +37,7 @@ export default async function RootLayout({
   const cookieStore = await cookies();
   const isCookie =
     cookieStore.get("timezoneData") == null ||
-    cookieStore.get("timezoneData") == undefined
+      cookieStore.get("timezoneData") == undefined
       ? false
       : true;
   console.log('isCookie', isCookie);
@@ -47,12 +48,14 @@ export default async function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <Suspense fallback={<div>Loading...</div>}>
-          <LayoutContent 
-            session={session} 
-            initialCookieState={isCookie}
-          >
-            {children}
-          </LayoutContent>
+          <QueryProvider>
+            <LayoutContent
+              session={session}
+              initialCookieState={isCookie}
+            >
+              {children}
+            </LayoutContent>
+          </QueryProvider>
         </Suspense>
       </body>
     </html>
