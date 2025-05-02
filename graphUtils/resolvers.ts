@@ -5,7 +5,7 @@ const resolvers = {
     // the argument is the title: outside-concert
     // the title from db looks like: Outside Concert
     event: async (_parent: any, args: any, context: Context) => {
-      console.log(args.slug);
+      // console.log(args.slug);
       const event = await context.prisma.event.findFirst({
         where: {
           slug: {
@@ -26,8 +26,8 @@ const resolvers = {
       const contains = args.contains || "";
       const city = args.city || "";
       const country = args.country || "";
-      const date = args.date || ""; // it expects a date string in the format YYYY-MM-DD
-
+      const shortDate = args.date.slice(0, 10) || ""; // it expects a date string in the format YYYY-MM-DD
+      console.log("date", shortDate);
       const filters: any[] = [];
 
       if (contains) {
@@ -57,10 +57,10 @@ const resolvers = {
         });
       }
 
-      if (date) {
+      if (shortDate) {
         filters.push({
           startHour: {
-            startsWith: date, // Matches the date part of the startHour field
+            startsWith: shortDate, // Matches the date part of the startHour field
           },
         });
       }

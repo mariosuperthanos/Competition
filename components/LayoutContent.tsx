@@ -7,14 +7,14 @@ import AuthProvider from './auth/AuthProvider';
 
 import { ReactNode } from 'react';
 
-export default function LayoutContent({ 
-  children, 
-  session, 
-  initialCookieState 
-}: { 
-  children: ReactNode; 
-  session: any; 
-  initialCookieState: boolean; 
+export default function LayoutContent({
+  children,
+  session,
+  initialCookieState
+}: {
+  children: ReactNode;
+  session: any;
+  initialCookieState: boolean;
 }) {
   const [cookieSet, setCookieSet] = useState(initialCookieState);
   const [isLoading, setIsLoading] = useState(!initialCookieState);
@@ -29,13 +29,13 @@ export default function LayoutContent({
       {!cookieSet && (
         <CookieSetter onComplete={handleCookieSet} />
       )}
-      
+
       {(cookieSet || !isLoading) && (
         <>
-          <div style={{ paddingTop: "13px", paddingLeft: "13px" }}>
-            <NavBar />
-          </div>
-          <AuthProvider session={session}>{children}</AuthProvider>
+          <NavBar isLogedIn={session} />
+          <main className="pt-0 pl-0">
+            <AuthProvider session={session}>{children}</AuthProvider>
+          </main>
         </>
       )}
     </>

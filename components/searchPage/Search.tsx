@@ -15,6 +15,11 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import useStore from "../../zustand/store";
 import getImageUrl from "../../library/searchEvents/getS3Image";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DemoContainer } from "@mui/x-date-pickers/internals/demo";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs from "dayjs";
 
 const formSchema = z.object({
   eventName: z.string().min(2, {
@@ -67,7 +72,7 @@ export default function EventSearchForm() {
         contains: searchParams.contains,
         city: searchParams.city,
         country: searchParams.country,
-        date: ""  // Ignore date for now as mentioned in your code
+        date: searchParams.date  // Ignore date for now as mentioned in your code
       };
 
       const response = await fetch("http://localhost:3000/api/graphql", {
@@ -87,12 +92,13 @@ export default function EventSearchForm() {
       }
 
       const result = await response.json();
+      console.log("GraphQL result:", result); // Log the result for debugging
       const rawEvents = result.data.events;
 
       const events = await Promise.all(
         rawEvents.map(async (event) => {
-          const image = await getImageUrl(event.title); 
-          // const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg'
+          // const image = await getImageUrl(event.title);
+          const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg'
           return {
             ...event,
             image,
@@ -175,32 +181,38 @@ export default function EventSearchForm() {
             )}
           />
 
+          {/* Date Field */}
           <FormField
             control={form.control}
             name="date"
             render={({ field }) => (
               <FormItem className="flex flex-col">
                 <FormLabel>Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn("w-full pl-3 text-left font-normal", !field.value && "text-muted-foreground")}
-                      >
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                        <CalendarIcon className="ml-auto h-4 w-4" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <FormControl>
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer components={['DatePicker']}>
+                      <DatePicker
+                        value={field.value ? dayjs(field.value) : null} // convertim Date -> Dayjs ca să înțeleagă DatePicker
+                        onChange={(newValue) => {
+                          const dateValue = newValue ? newValue.toDate() : null; // convertim Dayjs -> Date
+                          field.onChange(dateValue);
+                        }}
+                        slotProps={{
+                          textField: {
+                            className: "w-60",
+                            error: !!form.formState.errors.date,
+                            helperText: form.formState.errors.date?.message,
+                          }
+                        }}
+                      />
+                    </DemoContainer>
+                  </LocalizationProvider>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
           />
+          <div className="p-1"> </div>
 
           <Button
             type="submit"

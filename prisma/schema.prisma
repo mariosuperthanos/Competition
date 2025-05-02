@@ -15,12 +15,13 @@ datasource db {
 }
 
 model User {
-  id           String  @id @default(uuid())
-  name         String
-  email        String  @unique
-  password     String  @unique
-  hostedEvents Event[] @relation("UserEvents")
+  id            String         @id @default(uuid())
+  name          String
+  email         String         @unique
+  password      String         @unique
+  hostedEvents  Event[]        @relation("UserEvents")
   // plannedEvents Event[] @relation("Attendees")
+  notifications Notification[]
 }
 
 model Event {
@@ -38,4 +39,15 @@ model Event {
   slug        String @unique
   timezone    String
   // attendees   User[]   @relation("Attendees")
+}
+
+model Notification {
+  id      String @id @default(uuid())
+  title   String
+  message String
+  date    String
+  purpose String
+  read    Boolean @default(false)
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
 }
