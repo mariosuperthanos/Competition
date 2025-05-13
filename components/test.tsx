@@ -3,6 +3,11 @@
 import { CalendarIcon, ClockIcon, MapPinIcon, UserIcon } from "lucide-react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import Image from "next/image"
+import MapComponent from "./event/Map";
+import { useEffect, useState } from "react";
+import Cookie from 'js-cookie';
+import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 
 interface EventPageProps {
   title: string
@@ -23,11 +28,22 @@ function formatDate(date: Date): string {
   })
 }
 
-export default function Event2({ title, description, time, host, location, image, timezone }: EventPageProps) {
+export default function Event2({ title, description, time, host, location, image, lat, lng }: EventPageProps) {
+  let name;
+  useEffect(() => {
+    const fetchSession = async () => {
+      name = await getSession();
+      name = name?.user?.name;
+      console.log("session", name);
+    };
+    fetchSession();
+  }, [])
   const shareText = encodeURIComponent("Check out this interesting post!");
   const shareUrl = encodeURIComponent("https://exemplu.ro/postare");
   // Convert time to Date object if it's a string
-  const eventTime = typeof time === "string" ? new Date(time) : time
+  const eventStartHour = typeof time.startHour === "string" ? new Date(time) : time
+  console.log(time);
+  const [clicked, setClicked] = useState(false);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -58,9 +74,9 @@ export default function Event2({ title, description, time, host, location, image
               </div>
             </CardContent>
           </Card>
-          <button className="hidden md:block col-span-1 bg-white text-black border border-gray-300 rounded-xl px-4 py-2 hover:bg-gray-100 transition">
-            Join the event
-          </button>
+          <MapComponent lat={lat} lng={lng} shouldRender={true} settings={{
+            purpose: "marker",
+          }} />
 
         </div>
 
@@ -75,21 +91,26 @@ export default function Event2({ title, description, time, host, location, image
                 <CalendarIcon className="h-5 w-5 mt-0.5 text-muted-foreground" />
                 <div>
                   <p className="font-medium">Date</p>
-                  <p className="text-sm text-muted-foreground">{formatDate(eventTime)}</p>
+                  <p className="text-sm text-muted-foreground">{time.date}</p>
                 </div>
               </div>
 
               <div className="flex items-start gap-3">
                 <ClockIcon className="h-5 w-5 mt-0.5 text-muted-foreground" />
                 <div>
-                  <p className="font-medium">Start Hour</p>
+                  <p className="font-medium">Start Time</p>
                   <p className="text-sm text-muted-foreground">
-                    {eventTime.toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                      timeZoneName: "short",
-                    })}
-                    {timezone && ` (${timezone})`}
+                    {time.startHour}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <ClockIcon className="h-5 w-5 mt-0.5 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">End Time</p>
+                  <p className="text-sm text-muted-foreground">
+                    {time.endHour}
                   </p>
                 </div>
               </div>
@@ -168,9 +189,50 @@ export default function Event2({ title, description, time, host, location, image
               </div>
             </CardContent>
           </Card>
+
         </div>
+        <button className="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-2xl px-6 py-2.5 shadow-md transition duration-200 ease-in-out w-full md:w-auto" onClick={async () => {
+          setClicked(true)
+          const sendNofification = async () => {
+            const now = new Date();
+            const formattedDate = now.toISOString().split('.')[0];
+
+            const timezoneJSON = Cookie.get('timezoneData');
+            const data = JSON.parse(timezoneJSON!);
+            const timezone = data.data.timezone;
+            console.log("timezone", timezone);
+
+
+            const response = await fetch("http://localhost:3000/api/create-notification", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+
+              body: JSON.stringify({
+                notifications: [
+                  {
+                    title: "Request to Join Event",
+                    message: `User ${name} has requested to join your event "${title}". Would you like to approve their participation?`,
+                    date: formattedDate,
+                    purpose: "allow/deny",
+                    recipient: host,
+                    timezone,
+                  },
+                ],
+              }),
+            });
+            if (!response.ok) {
+              console.error("Error sending notification");
+            }
+          }
+          await sendNofification();
+        }}>
+          {clicked ? "Your request was sent." : "Join the event!"}
+        </button>
+
       </div>
-    </div>
+    </div >
   )
 }
 

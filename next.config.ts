@@ -16,6 +16,10 @@ const nextConfig: NextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com', // Add this pattern for the new image source
       },
+      {
+        protocol: 'https',
+        hostname: 'cdn.pixabay.com',
+      }
     ],
   },
 };

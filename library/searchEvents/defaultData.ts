@@ -18,6 +18,8 @@ const defautlData = async () => {
     lat: number;
     lng: number;
     distance: number;
+    city: string;
+    country: string;
   }>>`
   SELECT *, 
     (6371 * acos(cos(radians(${latitude})) * cos(radians("lat")) * cos(radians("lng") - radians(${longitude})) + sin(radians(${latitude})) * sin(radians("lat")))) AS distance

@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import Link from "next/link";
 
 export interface EventCardProps {
   title: string;
@@ -15,47 +16,56 @@ export interface EventCardProps {
   city: string;
   description: string;
   startHour: string;
+  slug: string;
 }
 
-const EventCard: React.FC<EventCardProps> = ({ title, image, country, city, description, startHour }) => {
+const EventCard: React.FC<EventCardProps> = ({ title, image, country, city, description, startHour, slug, timezone }) => {
+  const url = `/events/${slug}`; // Construct the URL for the event details page
+  const formattedDate = new Date(startHour).toLocaleString("en-US", {
+    timeZone: timezone, // Use the timezone from the event data
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
   return (
-    <Card className="w-[730px] p-6 relative max-h-52 overflow-hidden rounded-md shadow-md">
-      <div className="flex gap-4">
-        {/* Image in the left upper corner */}
-        <div className="relative w-[280px] h-[157px] flex-shrink-0 overflow-hidden rounded-md">
-        <Image
-          src={image}
-          alt={title}
-          width={280} // Specify width
-          height={157} // Specify height
-          className="object-cover rounded-md"
-        />
-
+    <Card className="w-full max-w-[730px] p-4 sm:p-6 relative overflow-hidden rounded-md shadow-md">
+      <div className="flex flex-col sm:flex-row sm:flex-wrap gap-4">
+        {/* Imaginea */}
+        <div className="relative w-full sm:w-[40%] h-[157px] flex-shrink-0 overflow-hidden rounded-md">
+          <Image
+            src={image}
+            alt={title}
+            width={280}
+            height={157}
+            className="object-cover w-full h-full rounded-md"
+          />
         </div>
 
-       {/* Event details */}
-       <div className="flex-1 pr-16">
-          <h3 className="text-xl font-bold text-left">{title}</h3>
-          <p className="text-sm text-muted-foreground text-left">
-            {city}, {country}
-          </p>
-          <div className="w-[380px]">
-            <p className="mt-2 line-clamp-3 text-sm text-left">{description}</p>
+        {/* Detalii */}
+        <div className="flex-1 sm:min-w-[50%] pr-1 sm:pr-4 flex flex-col justify-between">
+          <div>
+            <h3 className="text-lg sm:text-xl font-bold text-left">{title}</h3>
+            <p className="text-sm sm:text-base text-muted-foreground text-left">
+              {city}, {country}
+            </p>
+            <p className="mt-2 line-clamp-3 text-sm sm:text-base text-left pb-2.5">
+              {description}
+            </p>
           </div>
-          {/* Start hour in a colored square */}
-          <div className="absolute top-[144px] ">
-            {" "}
-            {/* Poziționare absolută */}
-            <div className="flex items-center justify-start rounded-md bg-blue-400 text-primary-foreground p-2">
-              <span className="text-sm font-medium">{startHour}</span>
+
+          {/* Butoane */}
+          <div className="flex justify-between items-center mt-4 sm:mt-6">
+            <div className="flex items-center justify-start rounded-md bg-blue-400 text-primary-foreground p-1.5 sm:p-2">
+              <span className="text-sm sm:text-base font-semibold">{formattedDate}</span>
             </div>
-          </div>
-          <div className="absolute top-[144px] right-10">
-            {" "}
-            {/* Poziționare absolută */}
-            <button className="flex items-center justify-start rounded-md bg-green-400 text-primary-foreground p-2 px-2.75 hover:bg-green-600 transition-colors duration-200 ease-in-out">
-              <span className="text-sm font-medium">Join</span>
-            </button>
+            <Link
+              href={url}
+              className="flex items-center justify-center rounded-md bg-green-500 text-white px-4 py-2 sm:px-5 sm:py-2.5 text-sm sm:text-base font-semibold hover:bg-green-600 transition-colors duration-200 ease-in-out"
+            >
+              Join
+            </Link>
           </div>
         </div>
       </div>

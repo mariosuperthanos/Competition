@@ -12,10 +12,11 @@ interface EventData {
   lng: number;
   file: unknown;
   timezone: string;
+  tags: string[];
 }
 
 const valdiateEventSchema = async (data: EventData): Promise<void> => {
-  console.log(data.file);
+  console.log(data.tags);
   await schema.validateAsync({
     title: data.title,
     description: data.description,
@@ -27,7 +28,7 @@ const valdiateEventSchema = async (data: EventData): Promise<void> => {
     lat: data.lat,
     lng: data.lng,
     file: data.file,
-    timezone: data.timezone
+    timezone: data.timezone,
   });
 };
 

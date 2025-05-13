@@ -26,6 +26,7 @@ export const POST = async (req: Request) => {
     const userid = await checkJWT();
 
     const data = await getData(req);
+    console.log("data", typeof data.tags);
     
     const filePath = path.join(uploadDir, data.file?.name);
 

@@ -73,3 +73,12 @@
     @apply bg-background text-foreground;
   }
 } */
+
+
+@layer utilities {
+  .bg-concert {
+    background-image: url('/concert.jpg') !important;
+    background-size: cover !important;
+    background-position: center !important;
+  }
+}

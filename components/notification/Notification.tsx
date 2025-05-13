@@ -4,18 +4,24 @@ import { useState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { formatDistanceToNow } from "date-fns"
 import { Bell } from "lucide-react"
+import { DateTime } from "luxon"
 
 interface NotificationProps {
   title: string
   message: string
-  date: Date
+  date: string
   isSeen: boolean
   interactive?: boolean
 }
 
 export function Notification({ title, message, date, isSeen, interactive = false }: NotificationProps) {
+  console.log("title", isSeen)
   const [responded, setResponded] = useState(false)
-  const formattedDate = formatDistanceToNow(date, { addSuffix: true })
+  const luxonDate = DateTime.fromFormat(date, "yyyy-MM-dd'T'HH:mm:ss z");
+
+  const jsDate = luxonDate.isValid ? luxonDate.toJSDate() : new Date();
+
+  const formattedDate = formatDistanceToNow(jsDate, { addSuffix: true });
 
   return (
     <Card className={`transition-colors`}>

@@ -69,7 +69,7 @@ const MapComponent = ({
       // let the user click on the meeting point
       map.current.on("click", async (e) => {
         const { lat, lng } = e.lngLat;
-        // console.log("Click coordinates:", lat, lng);
+        console.log("Click coordinates:", lat, lng);
 
         if (marker.current) {
           marker.current.remove();
@@ -81,21 +81,18 @@ const MapComponent = ({
           .addTo(map.current!);
 
         let city;
+        // console.log("Marker coordinates:", lat, lng);
 
-        // a loop that runs 10 times and make more calls to API if the results are still undefined
-        for (let i = 0; i < 10; i++) {
-          const location = await getLocation(lat, lng);
-          if (location) {
-            const { city: currentCity, country } = location;
-            city = currentCity;
+        const location = await getLocation(lat, lng);
+        console.log("Location data:", location);
 
-            if (city !== undefined) {
-              // console.log(`City found: ${city}, Country: ${country}`);
-              settings.passData(city, country, lat, lng);
-              break;
-            } else {
-              // console.log(`City is still undefined. Attempt ${i + 1}`);
-            }
+        if (location) {
+          const { city: currentCity, country } = location;
+          city = currentCity;
+
+          if (city !== undefined) {
+            // console.log(`City found: ${city}, Country: ${country}`);
+            settings.passData(city, country, lat, lng);
           }
         }
       });
@@ -122,23 +119,35 @@ const MapComponent = ({
 
   return (
     <div
+    style={{
+      width: "50%",
+      height: settings.purpose !== "marker" ? "200px" : "410px",
+      width: "100%",
+      position: "relative",
+      paddingLeft: "20px",
+      paddingTop: "50px",
+      marginTop: "20px",
+      marginLeft: "0px",
+      display: shouldRender ? "block" : "none",
+      border: "1px solid black",
+      borderRadius: "10px",
+      overflow: "hidden", // adaugă asta
+    }}
+  >
+    <div
+      ref={mapContainer}
       style={{
-        width: "50%",
-        height: "200px",
-        position: "relative",
-        paddingLeft: "20px",
-        paddingTop: "50px",
-        marginTop: "20px",
-        marginLeft: "20px",
-        display: shouldRender ? "block" : "none",
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        zIndex: 0,
       }}
-    >
-      <div
-        ref={mapContainer}
-        style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-      />
-    </div>
+    />
+  </div>
   );
 };
+
 
 export default MapComponent;

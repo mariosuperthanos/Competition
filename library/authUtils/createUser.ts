@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma";
+import saveTimezone from "../getUserData.ts/saveTimezone";
 import { existingUser } from "./existingUser";
 import { hashPassword } from "./hashPassword";
 
@@ -6,7 +7,7 @@ import { hashPassword } from "./hashPassword";
 export const createUser = async (
   username: string,
   email: string,
-  password: string
+  password: string,
 ) => {
   try {
     // verify if the email already exists
@@ -24,9 +25,12 @@ export const createUser = async (
     // hash the password
     const hashedPassword = await hashPassword(password);
 
+    // get user timezone
+    const userTimezone = await saveTimezone();
+
     // add the user in the DB
     const newUser = await prisma.user.create({
-      data: { name: username, email, password: hashedPassword },
+      data: { name: username, email, password: hashedPassword, timezone: userTimezone?.timezone },
     });
 
     return { message: "Account created successfully!", user: newUser };

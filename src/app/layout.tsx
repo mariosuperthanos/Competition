@@ -12,6 +12,7 @@ import CookieSetter from "../../components/CookieSetter";
 import { Suspense } from "react";
 import LayoutContent from "../../components/LayoutContent";
 import QueryProvider from "../../components/QueryProvider";
+import hasUnreadNotifications from "../../library/notifications/hasUnread";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -33,8 +34,12 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
-  const cookieStore = await cookies();
+  const [session, cookieStore] = await Promise.all([
+    getServerSession(authOptions),
+    cookies(),
+  ]);
+  const hasUnread = await hasUnreadNotifications(session?.user.id);
+  console.log('hasUnread', hasUnread);
   const isCookie =
     cookieStore.get("timezoneData") == null ||
       cookieStore.get("timezoneData") == undefined
@@ -45,13 +50,14 @@ export default async function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
       >
         <Suspense fallback={<div>Loading...</div>}>
           <QueryProvider>
             <LayoutContent
               session={session}
               initialCookieState={isCookie}
+              hasUnread={hasUnread}
             >
               {children}
             </LayoutContent>

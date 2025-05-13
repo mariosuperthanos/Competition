@@ -1,6 +1,8 @@
 import { z } from "zod";
 import { timeToMinutes } from "../converters/timeToMinutes";
 
+const timeRegex = /^(0[1-9]|1[0-2]):([0-5][0-9]) (AM|PM)$/;
+
 export const formSchema = z
   .object({
     title: z.string().min(2, {
@@ -11,15 +13,23 @@ export const formSchema = z
     }),
     date: z
       .date({
-        required_error: "A date is required.",
+        message: "A date is required.",
       })
       .refine((date) => date > new Date(), {
         message: "Date must be in the future.",
       }),
-    startHour: z.string(),
-    finishHour: z.string(),
+    startHour: z
+      .string()
+      .refine((value) => timeRegex.test(value), {
+        message: "Start hour must be in HH:MM AM/PM format.",
+      }),
+    finishHour: z
+      .string()
+      .refine((value) => timeRegex.test(value), {
+        message: "Finish hour must be in HH:MM AM/PM format.",
+      }),
     country: z.string().min(1, "A country is required"),
-    city: z.string().min(1, "A country is required"),
+    city: z.string().min(1, "A county is required"),
     map: z.boolean().refine((value) => value === true, {
       message: "Map must be true",
     }),

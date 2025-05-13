@@ -39,9 +39,11 @@ export default async function SearchEventsPage() {
   // ];
   return (
     <>
-      <div className="flex flex-col space-y-4">
-        <EventSearchForm />
-        <Events eventsArray={dummy}/>
+      <div className="flex min-h-screen flex-col items-center justify-center p-6 md:p-10">
+        <div className="w-full max-w-sm md:max-w-3xl">
+          <EventSearchForm />
+          <Events eventsArray={dummy} />
+        </div>
       </div>
     </>
   );

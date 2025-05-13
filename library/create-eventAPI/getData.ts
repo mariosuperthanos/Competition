@@ -15,6 +15,8 @@ const getData = async (req: Request) => {
     lng: parseFloat(formData.get("lng") as string),
     file: formData.get("file") as File | null,
     timezone: formData.get("timezone") as string,
+    hostName: formData.get("hostName") as string,
+    tags: formData.getAll("tags[]") as string[]
   };
 };
 

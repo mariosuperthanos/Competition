@@ -10,11 +10,13 @@ import { ReactNode } from 'react';
 export default function LayoutContent({
   children,
   session,
-  initialCookieState
+  initialCookieState,
+  hasUnread
 }: {
   children: ReactNode;
   session: any;
   initialCookieState: boolean;
+  hasUnread: boolean;
 }) {
   const [cookieSet, setCookieSet] = useState(initialCookieState);
   const [isLoading, setIsLoading] = useState(!initialCookieState);
@@ -32,7 +34,7 @@ export default function LayoutContent({
 
       {(cookieSet || !isLoading) && (
         <>
-          <NavBar isLogedIn={session} />
+          <NavBar isLoggedIn={session} hasUnread={hasUnread} />
           <main className="pt-0 pl-0">
             <AuthProvider session={session}>{children}</AuthProvider>
           </main>

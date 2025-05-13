@@ -38,7 +38,8 @@ import { useSession } from "next-auth/react";
 import formatData from "../../library/converters/formatData";
 import convertObjToForm from "../../library/converters/convertObjToForm";
 import getTimeZone from "../../library/converters/getTimeZone";
-import { useRef } from "react";
+import { useRef, useState } from "react";
+import { useMutation, useQuery } from "@tanstack/react-query"; // TanStack Query for dynamic data fetching
 
 
 import { DemoContainer } from '@mui/x-date-pickers/internals/demo';
@@ -50,6 +51,37 @@ import dayjs from 'dayjs';
 import { MobileTimePicker } from '@mui/x-date-pickers/MobileTimePicker';
 import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
+import getLocation from "../../library/map/getLocation";
+import TagSelector from "../testFolder/tagsSelector";
+
+
+const interestTags = [
+  "Cycling",
+  "Music",
+  "Reading",
+  "Fitness",
+  "Art",
+  "Networking",
+  "Technology",
+  "Gaming",
+  "Photography",
+  "Cooking",
+  "Volunteering",
+  "Dance",
+  "Outdoor",
+  "Startup",
+  "Workshop",
+  "Meditation",
+  "Hiking",
+  "Coding",
+  "Film",
+  "Theater",
+  "Language Exchange",
+  "Travel",
+  "Food Tasting",
+  "Debate",
+]
+
 
 
 let firstTime = true;
@@ -57,6 +89,9 @@ let firstTime = true;
 let firstTimeCity = true;
 
 const CreateUserComp = () => {
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const { data: session } = useSession();
+
   // form based on schema
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -64,7 +99,7 @@ const CreateUserComp = () => {
       title: "Python meeting",
       description: "gkdjfkgjdkgkdfnglsgklnsklgksgdg",
       date: undefined,
-      startHour: "12:00 PM",
+      startHour: "",
       finishHour: "12:00 PM",
       country: "Romania",
       city: "",
@@ -75,6 +110,48 @@ const CreateUserComp = () => {
     },
   });
 
+  const mutation = useMutation({
+    mutationFn: async (data: any) => {
+      console.log(data);
+      const valuesCopy = { ...data };
+      // console.log(data.getValues().file);
+      const formattedStartH = formatData(data.date.toString(), valuesCopy.startHour);
+      const formattedEndH = formatData(data.date.toString(), valuesCopy.finishHour);
+
+      const timezone = await getTimeZone(parseFloat(data.lat), parseFloat(data.lng));
+      const { country, city } = await getLocation(parseFloat(data.lat), parseFloat(data.lng));
+
+      valuesCopy.country = country;
+      valuesCopy.city = city;
+      valuesCopy.startHour = formattedStartH;
+      valuesCopy.finishHour = formattedEndH;
+      valuesCopy.timezone = timezone;
+      const hostName = session?.user?.name;
+      valuesCopy.hostName = hostName;
+      console.log("valuesCopy", session);
+      valuesCopy.tags = selectedTags;
+      console.log("valuesCopy", valuesCopy);
+
+      const formData = convertObjToForm(valuesCopy);
+      // console.log(formData.file);
+      console.log('13131', formData);
+
+      const response = await axios.post("http://localhost:3000/api/createEvent", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      console.log(response.data);
+      return response.data;
+    }, onError: (error) => {
+      console.error("There was an error from the server"); // aici ai răspunsul de la backend
+    }, onSuccess: (data) => {
+      console.log("The event was created successfully!"); // aici ai răspunsul de la backend
+      setTimeout(() => {
+        window.location.href = "/search-events";
+      }, 1000);
+    }
+  });
 
   // function that tells if the data from interactive map is OK
   // This function is getting passed into the MapComponent(it sends the data back)
@@ -92,41 +169,8 @@ const CreateUserComp = () => {
   };
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    const valuesCopy = { ...values };
-    console.log(values.file);
-    const formattedStartH = formatData(values.date.toString(), valuesCopy.startHour);
-    const formattedEndH = formatData(values.date.toString(), valuesCopy.finishHour);
-
-    const timezone = await getTimeZone(parseFloat(values.lat), parseFloat(values.lng));
-
-    valuesCopy.startHour = formattedStartH;
-    valuesCopy.finishHour = formattedEndH;
-    valuesCopy.timezone = timezone;
-
-    const formData = convertObjToForm(valuesCopy);
-    console.log(formData.file);
-
-    try {
-      console.log(1);
-      // it also verify JWT token
-      const request = await axios.post(
-        "http://localhost:3000/api/createEvent",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log(request);
-
-      if (request.status == 200) {
-        console.log("success");
-      }
-    } catch (error) {
-      console.log(error);
-    }
+    console.log("Form submitted:", values);
+    mutation.mutate(values);
   };
 
   // funciton that validate text input from "country" and "county" fields
@@ -134,16 +178,28 @@ const CreateUserComp = () => {
     try {
       const REQ_URL =
         mode === "country"
-          ? `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()}&key=1815f05342614d459cd09ea741dcfc58`
-          : `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()},${form.getValues(
-            "country"
-          )}&key=1815f05342614d459cd09ea741dcfc58`;
+          ? `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()}&key=1815f05342614d459cd09ea741dcfc58&language=en`
+          : `https://api.opencagedata.com/geocode/v1/json?q=${value.trim()},${form.getValues("country")}&key=1815f05342614d459cd09ea741dcfc58&language=en`;
 
       const req = await axios.get(REQ_URL);
+
+      const components = req.data.results[0].components;
+
       const data =
         mode === "country"
-          ? req.data?.results[0]?.components?.country
-          : req.data?.results[0]?.components?.county;
+          ? components?.country
+          : components?.county ||
+          components?.city ||
+          components?.town ||
+          components?.hamlet ||
+          components?.suburb ||
+          components?.municipality ||
+          components?.locality ||
+          components?.state ||
+          components?.state_district ||
+          components?.district ||
+          components?.region
+        ;
       const cleanedText = removeDiacritics(data);
       console.log(cleanedText);
       console.log(value);
@@ -154,8 +210,8 @@ const CreateUserComp = () => {
         form.setValue(mode, cleanedText);
         form.clearErrors(mode);
         if (mode === "city") {
-          const lat2 = req.data.results[1].geometry.lat;
-          const lng2 = req.data.results[1].geometry.lng;
+          const lat2 = req.data?.results[1]?.geometry.lat || req.data?.results[0]?.geometry.lat;
+          const lng2 = req.data?.results[1]?.geometry.lng || req.data?.results[0]?.geometry.lng;
           form.setValue("lat", lat2.toString());
           form.setValue("lng", lng2.toString());
           firstTimeCity = false;
@@ -176,11 +232,11 @@ const CreateUserComp = () => {
   // console.log(lat, lng)
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+    <div className="flex justify-center items-center min-h-screen">
       <Form {...form}>
         <form
           onSubmit={form.handleSubmit(onSubmit)}
-          className="max-w-md w-full bg-white p-6 rounded-lg shadow-md"
+          className="max-w-lg w-full bg-white p-6 rounded-lg shadow-md"
         >
           {/* Title Field */}
           <FormField
@@ -192,7 +248,7 @@ const CreateUserComp = () => {
                 <FormControl>
                   <Input className="border-2 border-gray-300" placeholder="Enter title" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -208,7 +264,7 @@ const CreateUserComp = () => {
                 <FormControl>
                   <Input className="border-2 border-gray-300" placeholder="Enter description" {...field} />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -230,18 +286,18 @@ const CreateUserComp = () => {
                           const dateValue = newValue ? newValue.toDate() : null; // convertim Dayjs -> Date
                           field.onChange(dateValue);
                         }}
-                        slotProps={{
-                          textField: {
-                            className: "w-60",
-                            error: !!form.formState.errors.date,
-                            helperText: form.formState.errors.date?.message,
-                          }
-                        }}
+                      // slotProps={{
+                      //   textField: {
+                      //     className: "w-60",
+                      //     error: !!form.formState.errors.date,
+                      //     helperText: form.formState.errors.date?.message,
+                      //   }
+                      // }}
                       />
                     </DemoContainer>
                   </LocalizationProvider>
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
@@ -268,7 +324,7 @@ const CreateUserComp = () => {
                       }}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -297,7 +353,7 @@ const CreateUserComp = () => {
                       }}
                     />
                   </FormControl>
-                  <FormMessage />
+                  <FormMessage className="text-red-500" />
                 </FormItem>
               )}
             />
@@ -350,9 +406,9 @@ const CreateUserComp = () => {
                       }}
                     />
                   </FormControl>
-                  <FormMessage>
+                  <FormMessage className="text-red-500">
                     {form.formState.errors?.country?.message}
-                  </FormMessage>
+                  </FormMessage >
                 </FormItem>
               );
             }}
@@ -405,23 +461,27 @@ const CreateUserComp = () => {
                         }}
                       />
                     </FormControl>
-                    <FormMessage>
+                    <FormMessage className="text-red-500">
                       {form.formState.errors?.city?.message}
-                    </FormMessage>
+                    </FormMessage >
                   </FormItem>
                 );
               }}
             />
           )}
-
           {/* Map Field */}
-          <MapComponent
-            key={"gagga"}
-            lat={lat}
-            lng={lng}
-            shouldRender={!firstTimeCity}
-            settings={{ purpose: "interactive", passData: updateUIonClick }}
-          />
+          {!firstTimeCity && (
+            <>
+              <p className="pt-2">Click on the meetup location on the map</p>
+              <MapComponent
+                key={"gagga"}
+                lat={lat}
+                lng={lng}
+                shouldRender={!firstTimeCity}
+                settings={{ purpose: "interactive", passData: updateUIonClick }}
+              />
+            </>
+          )}
           {/* File Upload Field */}
           <FormField
             control={form.control}
@@ -437,16 +497,26 @@ const CreateUserComp = () => {
                     }}
                   />
                 </FormControl>
-                <FormMessage />
+                <FormMessage className="text-red-500" />
               </FormItem>
             )}
           />
+          {mutation.isError && (
+            <p className="pt-3 text-red-500">There was an error from the server</p>
+          )}
+          {mutation.isSuccess && (
+            <p className="pt-3">The event was created successfully!</p>
+          )}
+          <div className="pt-2"> </div>
+
+          {/* Tags Field */}
+          <p className="pb-2">Select up to 5 tags(optional)</p>
+          <TagSelector selectedTags={selectedTags} tags={interestTags} onChange={setSelectedTags} maxSelection={5} />
 
           {/* Submit Button */}
-          <Button type="submit" className="mt-6 bg-black text-white">
-            Submit
+          <Button disabled={mutation.isPending} type="submit" className="mt-6 bg-black text-white">
+            {mutation.isPending ? "Creating..." : "Create Event"}
           </Button>
-
         </form>
       </Form>
     </div>

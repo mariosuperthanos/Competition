@@ -16,18 +16,17 @@ datasource db {
 
 model User {
   id            String         @id @default(uuid())
-  name          String
+  name          String         @unique
   email         String         @unique
   password      String         @unique
   hostedEvents  Event[]        @relation("UserEvents")
-  // plannedEvents Event[] @relation("Attendees")
-  notifications Notification[]
+  notifications Notification[] @relation("UserNotifications")
+  timezone      String         @default("Europe/Madrid")
 }
 
 model Event {
   id          String @id @default(uuid())
   title       String @unique
-  hosts       User[] @relation("UserEvents")
   description String
   date        String
   startHour   String
@@ -38,16 +37,20 @@ model Event {
   lng         Float
   slug        String @unique
   timezone    String
+  hostId      String
+  host        User   @relation("UserEvents", fields: [hostId], references: [id])
+  hostName    String
+  tags        String[]
   // attendees   User[]   @relation("Attendees")
 }
 
 model Notification {
-  id      String @id @default(uuid())
-  title   String
-  message String
-  date    String
-  purpose String
-  read    Boolean @default(false)
-  userId  String
-  user    User   @relation(fields: [userId], references: [id])
+  id        String  @id @default(uuid())
+  title     String
+  message   String
+  date      String
+  purpose   String
+  read      Boolean @default(false)
+  recipient String
+  user      User    @relation("UserNotifications", fields: [recipient], references: [id])
 }

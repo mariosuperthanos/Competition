@@ -1,7 +1,28 @@
+import { getServerSession } from "next-auth";
 import { Notification } from "../../../components/notification/Notification";
+import { authOptions } from "../api/auth/[...nextauth]/route";
+import prisma from "../../../lib/prisma";
+import { cookies } from "next/headers";
+import { DateTime } from "luxon";
+import ExpireNotifications from "../../../components/ExpireNotifications";
 
-export default function NotificationsPage() {
+// purpose can be: "allow/reject", "response to allow/reject", "ask for particitation"
+
+export default async function NotificationsPage() {
+  const cookieStore = await cookies();
+  const timezoneData = cookieStore.get("timezoneData")?.value;
+  const parsedData = JSON.parse(timezoneData!);
+  const timezone = parsedData.data.timezone;
+  console.log("timezoneData", timezone);
+
+  const session = await getServerSession(authOptions);
+  const userId = session?.token.id;
+  const now = DateTime.now().setZone(timezone);
+  const formatted = now.toFormat("yyyy-MM-dd'T'HH:mm:ss z");
+  console.log("user", userId);
+  // Check if the user is authenticated
   // Sample notifications data
+
   const notifications = [
     {
       id: 1,
@@ -36,9 +57,24 @@ export default function NotificationsPage() {
       interactive: false,
     },
   ]
+  const allNotifications = await prisma.notification.findMany({
+    where: {
+      recipient: userId,
+    },
+  });
 
+  console.log("allNotifications", allNotifications);
+  const filteredNotifications = allNotifications.filter(n => {
+    const notifDate = DateTime.fromFormat(n.date, "yyyy-MM-dd'T'HH:mm:ss z");
+    console.log("notifDate", notifDate);
+    console.log("now", now);
+    return notifDate <= now;
+  })
+  console.log("filteredNotifications", filteredNotifications);
   // Count unread notifications
-  const unreadCount = notifications.filter((notification) => !notification.isSeen).length
+  const unreadCount = filteredNotifications.filter((notification) => !notification.read).length
+
+  const idsToUpdate = filteredNotifications.map(n => n.id);
 
   return (
     <main className="container mx-auto py-8 px-4">
@@ -48,25 +84,27 @@ export default function NotificationsPage() {
           You have {unreadCount} unread notification{unreadCount !== 1 ? "s" : ""}
         </p>
       </div>
-  
-      <div className="space-y-4">
-        {notifications.map((notification) => (
+
+      {filteredNotifications.map((notification) => {
+        console.log(notification);
+        return (
           <Notification
             key={notification.id}
             title={notification.title}
             message={notification.message}
             date={notification.date}
-            isSeen={notification.isSeen}
-            interactive={notification.interactive}
+            isSeen={!notification.read}
+            interactive={notification.purpose === "allow/deny"}
           />
-        ))}
-  
-        {notifications.length === 0 && (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">You don't have any notifications yet.</p>
-          </div>
-        )}
-      </div>
-    </main>
+        );
+      })}
+
+      {notifications.length === 0 && (
+        <div className="text-center py-12">
+          <p className="text-muted-foreground">You don't have any notifications yet.</p>
+        </div>
+      )}
+      <ExpireNotifications idsToUpdate={idsToUpdate}></ExpireNotifications>
+    </main >
   );
 }
