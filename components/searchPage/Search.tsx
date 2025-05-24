@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Tags } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import removeDiacritics from "../../library/converters/removeDiacritics";
 import axios from "axios";
+import TagSelector from "../testFolder/tagsSelector";
 
 
 const formSchema = z.object({
@@ -32,31 +33,78 @@ const formSchema = z.object({
 });
 
 // GraphQL query
-const EVENTS_QUERY = `
-  query GetEvents($contains: String, $city: String, $country: String, $date: String) {
-    events(contains: $contains, city: $city, country: $country, date: $date) {
+export const EVENTS_QUERY = `
+  query GetEvents(
+    $contains: String
+    $city: String
+    $country: String
+    $date: String
+    $tags: [String!]
+    $page: Int
+  ) {
+    events(
+      contains: $contains
+      city: $city
+      country: $country
+      date: $date
+      tags: $tags
+      page: $page
+    ) {
       id
       title
       city
       country
       startHour
+      tags
+      description
+      slug
+      timezone
     }
   }
 `;
+
+
 
 // Type for search parameters
 interface SearchParams {
   contains: string;
   city: string;
   country: string;
-  date: string | string;
-  refresh?: boolean; // Optional property to trigger a refresh
+  date: string;
+  refresh?: boolean;
 }
+
+const interestTags = [
+  "Cycling",
+  "Music",
+  "Reading",
+  "Fitness",
+  "Art",
+  "Networking",
+  "Technology",
+  "Gaming",
+  "Photography",
+  "Cooking",
+  "Volunteering",
+  "Dance",
+  "Outdoor",
+  "Startup",
+  "Workshop",
+  "Meditation",
+  "Hiking",
+  "Coding",
+  "Film",
+  "Theater",
+  "Language Exchange",
+  "Travel",
+  "Food Tasting",
+  "Debate",
+]
 
 let firstTime = true;
 
 export default function EventSearchForm() {
-  // State to store search parameters
+  const [selectedTags, setSelectedTags] = useState([]);
   const [searchParams, setSearchParams] = useState<SearchParams | null>(null);
 
   // Setup the query with the searchParams dependency
@@ -69,8 +117,11 @@ export default function EventSearchForm() {
         contains: searchParams.contains,
         city: searchParams.city,
         country: searchParams.country,
-        date: searchParams.date  // Ignore date for now as mentioned in your code
+        date: searchParams.date,
+        tags: selectedTags
       };
+      useStore.setState({ searchCriteria: { copy } });
+      useStore.setState({ tags: selectedTags });
 
       const response = await fetch("http://localhost:3000/api/graphql", {
         method: "POST",
@@ -94,6 +145,13 @@ export default function EventSearchForm() {
       }
       console.log("GraphQL result:", result); // Log the result for debugging
       const rawEvents = result.data.events;
+      console.log("search events length", rawEvents.length)
+
+      if (rawEvents.length === 11) {
+        useStore.setState({ isNextPage: true})
+      } else {
+        useStore.setState({ isNextPage: false})
+      }
 
       const events = await Promise.all(
         rawEvents.map(async (event) => {
@@ -146,7 +204,7 @@ export default function EventSearchForm() {
           components?.state_district ||
           components?.district ||
           components?.region
-    ;
+        ;
       const cleanedText = removeDiacritics(data);
       console.log(cleanedText);
       console.log(value);
@@ -320,6 +378,8 @@ export default function EventSearchForm() {
               </FormItem>
             )}
           />
+          <p className="">Select tags</p>
+          <TagSelector selectedTags={selectedTags} tags={interestTags} onChange={setSelectedTags} maxSelection={24} />
 
           <Button
             type="submit"

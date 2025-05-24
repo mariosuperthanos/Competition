@@ -22,26 +22,39 @@ model User {
   hostedEvents  Event[]        @relation("UserEvents")
   notifications Notification[] @relation("UserNotifications")
   timezone      String         @default("Europe/Madrid")
+  eventRequests EventRequest[] // relația many-to-many cu state
+  tags          String[]       @default([])
 }
 
 model Event {
+  id            String         @id @default(uuid())
+  title         String         @unique
+  description   String
+  date          String
+  startHour     String
+  finishHour    String
+  country       String
+  city          String
+  lat           Float
+  lng           Float
+  slug          String         @unique
+  timezone      String
+  hostId        String
+  host          User           @relation("UserEvents", fields: [hostId], references: [id])
+  hostName      String
+  tags          String[]       @default([])
+  eventRequests EventRequest[] // relația many-to-many cu state
+}
+
+model EventRequest {
   id          String @id @default(uuid())
-  title       String @unique
-  description String
-  date        String
-  startHour   String
-  finishHour  String
-  country     String
-  city        String
-  lat         Float
-  lng         Float
-  slug        String @unique
-  timezone    String
-  hostId      String
-  host        User   @relation("UserEvents", fields: [hostId], references: [id])
-  hostName    String
-  tags        String[]
-  // attendees   User[]   @relation("Attendees")
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String
+  event       Event  @relation(fields: [eventId], references: [id])
+  eventId     String
+  buttonState String @default("notClicked") // "requested", "accepted", "rejected", "host". If the user didn't click that button than we dont save it in the table
+
+  @@unique([userId, eventId]) // ca să nu existe dubluri
 }
 
 model Notification {
@@ -53,4 +66,5 @@ model Notification {
   read      Boolean @default(false)
   recipient String
   user      User    @relation("UserNotifications", fields: [recipient], references: [id])
+  responded Boolean @default(false)
 }

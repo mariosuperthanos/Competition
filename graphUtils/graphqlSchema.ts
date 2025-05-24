@@ -1,4 +1,4 @@
-import {gql} from "graphql-tag";
+import { gql } from "graphql-tag";
 
 const typeDefs = gql`
   type User {
@@ -6,12 +6,13 @@ const typeDefs = gql`
     name: String!
     email: String!
     password: String!
-    hostedEvents: [Event!]
+    hostedEvents: [Event!]!
+    timezone: String!
   }
-  type Event{
+
+  type Event {
     id: ID!
     title: String!
-    hosts: [User!]
     description: String!
     date: String!
     startHour: String!
@@ -21,10 +22,33 @@ const typeDefs = gql`
     lat: Float!
     lng: Float!
     slug: String!
+    timezone: String!
+    hostName: String!
+    tags: [String!]!
+    host: User!
   }
-  type Query{
+
+  type Notification {
+    id: ID!
+    title: String!
+    message: String!
+    date: String!
+    purpose: String!
+    read: Boolean!
+    recipient: String!
+  }
+
+  type Query {
     event(slug: String!): Event!
-    events(contains: String, city: String, country: String, date: String): [Event!]!
+    events(
+      contains: String
+      city: String
+      country: String
+      date: String
+      tags: [String!]
+      page: Int 
+    ): [Event!]!
   }
 `
+
 export default typeDefs;

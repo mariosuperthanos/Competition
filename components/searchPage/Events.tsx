@@ -5,11 +5,17 @@ import useStore from "../../zustand/store";
 import EventCard from "./EventCard";
 import { EventCardProps } from "./EventCard";
 
-const Events = ({ eventsArray }: { eventsArray: EventCardProps }) => {
+const Events = ({ eventsArray }: { eventsArray: EventCardProps[] }) => {
   const events = useStore((state) => state.events);
   console.log("Events from store:", events); // Log pentru a verifica datele din store 
+  console.log("length", eventsArray.length)
   useEffect(() => {
     useStore.setState({ events: eventsArray });
+    if (eventsArray.length === 11) {
+      useStore.setState({ isNextPage: true })
+    } else {
+      useStore.setState({ isNextPage: false })
+    }
   }, [eventsArray]);
 
   return (

@@ -53,6 +53,7 @@ import { DesktopTimePicker } from '@mui/x-date-pickers/DesktopTimePicker';
 import { StaticTimePicker } from '@mui/x-date-pickers/StaticTimePicker';
 import getLocation from "../../library/map/getLocation";
 import TagSelector from "../testFolder/tagsSelector";
+import slugify from "slugify";
 
 
 const interestTags = [
@@ -121,8 +122,8 @@ const CreateUserComp = () => {
       const timezone = await getTimeZone(parseFloat(data.lat), parseFloat(data.lng));
       const { country, city } = await getLocation(parseFloat(data.lat), parseFloat(data.lng));
 
-      valuesCopy.country = country;
-      valuesCopy.city = city;
+      valuesCopy.country = removeDiacritics(country);
+      valuesCopy.city = removeDiacritics(city);
       valuesCopy.startHour = formattedStartH;
       valuesCopy.finishHour = formattedEndH;
       valuesCopy.timezone = timezone;
@@ -131,6 +132,9 @@ const CreateUserComp = () => {
       console.log("valuesCopy", session);
       valuesCopy.tags = selectedTags;
       console.log("valuesCopy", valuesCopy);
+      const slug = slugify(data.title, { lower: true, strict: true });
+      const slugHref = `/events/${slug}`;
+      const userId = session.token.id;
 
       const formData = convertObjToForm(valuesCopy);
       // console.log(formData.file);
@@ -141,14 +145,17 @@ const CreateUserComp = () => {
           "Content-Type": "multipart/form-data",
         },
       });
+      const eventId = response.data.data.id;
+      console.log("eventId",eventId)
+      const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId, eventId, buttonState: "host"})
       console.log(response.data);
-      return response.data;
+      return slugHref;
     }, onError: (error) => {
       console.error("There was an error from the server"); // aici ai răspunsul de la backend
-    }, onSuccess: (data) => {
+    }, onSuccess: (slugHref) => {
       console.log("The event was created successfully!"); // aici ai răspunsul de la backend
       setTimeout(() => {
-        window.location.href = "/search-events";
+        window.location.href = slugHref;
       }, 1000);
     }
   });

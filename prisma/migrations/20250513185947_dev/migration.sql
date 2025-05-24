@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Event" ALTER COLUMN "tags" SET DEFAULT ARRAY[]::TEXT[];

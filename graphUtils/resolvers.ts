@@ -22,61 +22,77 @@ const resolvers = {
       return event;
     },
     events: async (_parent: any, args: any, context: Context) => {
-      console.log("args", args);
-      const contains = args.contains || "";
-      const city = args.city || "";
-      const country = args.country || "";
-      const shortDate = args.date.slice(0, 10) || ""; // it expects a date string in the format YYYY-MM-DD
-      console.log("date", shortDate);
-      const filters: any[] = [];
+      try {
+        const contains = args.contains || "";
+        const city = args.city || "";
+        const country = args.country || "";
+        const shortDate = args.date?.slice(0, 10) || "";
+        const tags = args.tags || [];
+        const page = args.page || 1; // default to page 1
 
-      if (contains) {
-        filters.push({
-          title: {
-            contains: contains,
-            mode: "insensitive", // ignore uppercase/lowercase
+        const filters: any[] = [];
+
+        if (contains) {
+          filters.push({
+            title: {
+              contains: contains,
+              mode: "insensitive",
+            },
+          });
+        }
+
+        if (city) {
+          filters.push({
+            city: {
+              equals: city,
+              mode: "insensitive",
+            },
+          });
+        }
+
+        if (country) {
+          filters.push({
+            country: {
+              equals: country,
+              mode: "insensitive",
+            },
+          });
+        }
+
+        if (shortDate) {
+          filters.push({
+            startHour: {
+              startsWith: shortDate,
+            },
+          });
+        }
+
+        if (tags.length > 0) {
+          filters.push({
+            tags: {
+              hasSome: tags,
+            },
+          });
+        }
+
+        const events = await context.prisma.event.findMany({
+          where: {
+            AND: filters,
           },
+          skip: (page - 1) * 10,
+          take: 11, // 10 for display + 1 to check if there's a next page
         });
+
+        if (!events || events.length === 0) {
+          throw new Error("No events found");
+        }
+
+        return events;
+      } catch (error) {
+        console.error("Error fetching events:", error);
+        throw new Error("Failed to fetch events.");
       }
-
-      if (city) {
-        filters.push({
-          city: {
-            equals: city,
-            mode: "insensitive", // ignore uppercase/lowercase
-          },
-        });
-      }
-
-      if (country) {
-        filters.push({
-          country: {
-            equals: country,
-            mode: "insensitive", // ignore uppercase/lowercase
-          },
-        });
-      }
-
-      if (shortDate) {
-        filters.push({
-          startHour: {
-            startsWith: shortDate, // Matches the date part of the startHour field
-          },
-        });
-      }
-
-      const events = await context.prisma.event.findMany({
-        where: {
-          AND: filters,
-        },
-      });
-
-      if (!events || events.length === 0) {
-        throw new Error("No events found");
-      }
-
-      return events;
-    },
+    }
   },
 };
 

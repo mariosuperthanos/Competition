@@ -94,7 +94,8 @@ export default async function NotificationsPage() {
             message={notification.message}
             date={notification.date}
             isSeen={!notification.read}
-            interactive={notification.purpose === "allow/deny"}
+            purpose={notification.responded == true ? "" : notification.purpose }
+            id={notification.id}
           />
         );
       })}

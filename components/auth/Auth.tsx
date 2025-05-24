@@ -67,7 +67,7 @@ export function AuthForm({ className, ...props }: React.ComponentProps<"div">) {
         throw new Error("Something went wrong. Try to again!");
       }
 
-      window.location.href = "/"; // Redirect to dashboard after successful login
+      window.location.href = "/tags"; // Redirect to dashboard after successful login
     } catch (err: any) {
       setFeedback(
         err?.response?.data?.message || err.message || "An error occurred."

@@ -2,17 +2,16 @@
 
 import { cookies } from 'next/headers'
 import prisma from '../../lib/prisma';
+import { Prisma } from '@prisma/client';
 import getImageUrl from './getS3Image';
 
-const defautlData = async () => {
+const defaultData = async (tags = null) => {
   const cookieStore = await cookies();
   const data = cookieStore.get('timezoneData');
   const parsedData = JSON.parse(data?.value!);
   const { latitude, longitude } = parsedData.data;
-  console.log('latitude', latitude);
-  console.log('longitude', longitude);
 
-  const eventsRaw = await prisma.$queryRaw<Array<{
+  let eventsRaw: Array<{
     id: number;
     title: string;
     lat: number;
@@ -20,19 +19,42 @@ const defautlData = async () => {
     distance: number;
     city: string;
     country: string;
-  }>>`
-  SELECT *, 
-    (6371 * acos(cos(radians(${latitude})) * cos(radians("lat")) * cos(radians("lng") - radians(${longitude})) + sin(radians(${latitude})) * sin(radians("lat")))) AS distance
-  FROM "Event"
-  WHERE "lat" IS NOT NULL AND "lng" IS NOT NULL
-  ORDER BY distance ASC
-  LIMIT 10;
-`;
+    tags: string[]
+  }>;
+
+  if (tags) {
+    const formattedTags = tags.map(tag =>
+      tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()
+    );
+    // Query with tags filter - using  parameterized query for security
+    eventsRaw = await prisma.$queryRaw`
+      SELECT *, 
+        (6371 * acos(cos(radians(${latitude})) * cos(radians("lat")) * cos(radians("lng") - radians(${longitude})) + sin(radians(${latitude})) * sin(radians("lat")))) AS distance
+      FROM "Event"
+      WHERE "lat" IS NOT NULL 
+        AND "lng" IS NOT NULL 
+        AND "tags" && ${formattedTags}::text[]
+      ORDER BY distance ASC
+      LIMIT 13
+    `;
+    
+  } else {
+    // Query without tags filter
+    eventsRaw = await prisma.$queryRaw`
+      SELECT *, 
+        (6371 * acos(cos(radians(${latitude})) * cos(radians("lat")) * cos(radians("lng") - radians(${longitude})) + sin(radians(${latitude})) * sin(radians("lat")))) AS distance
+      FROM "Event"
+      WHERE "lat" IS NOT NULL 
+        AND "lng" IS NOT NULL
+      ORDER BY distance ASC
+      LIMIT 11
+    `;
+  }
+  const sliceLimit = tags === null ? 10 : 13;
 
   const events = await Promise.all(
-    eventsRaw.map(async (event) => {
-      // const image = await getImageUrl(event.title); 
-      const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg'
+    eventsRaw.slice(0, sliceLimit).map(async (event) => {
+      const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg';
       return {
         ...event,
         image,
@@ -40,10 +62,9 @@ const defautlData = async () => {
     })
   );
 
+  const existNextPage = eventsRaw.length > 10;
 
-  console.log('events', events);
-
-  return events;
+  return { events, existNextPage };
 }
 
-export default defautlData;
+export default defaultData;

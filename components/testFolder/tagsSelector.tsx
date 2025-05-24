@@ -9,7 +9,7 @@ interface TagSelectorProps {
   error?: string
 }
 
-export default function TagSelector({ tags, selectedTags, onChange, maxSelection = 5, error }: TagSelectorProps) {
+export default function TagSelector({ tags, selectedTags, onChange, maxSelection = 6, error }: TagSelectorProps) {
   const handleTagClick = (tag: string) => {
     const isSelected = selectedTags.includes(tag)
     let newSelection: string[]

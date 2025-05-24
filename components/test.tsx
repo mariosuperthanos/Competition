@@ -6,10 +6,12 @@ import Image from "next/image"
 import MapComponent from "./event/Map";
 import { useEffect, useState } from "react";
 import Cookie from 'js-cookie';
-import { getSession } from "next-auth/react";
+import { getSession, useSession } from "next-auth/react";
 import { getServerSession } from "next-auth";
+import axios from "axios";
 
 interface EventPageProps {
+  id: string | number
   title: string
   description: string
   time: string | Date
@@ -17,6 +19,12 @@ interface EventPageProps {
   location: string
   image: string
   timezone: string
+  tags: string[]
+  lat: number
+  lng: number
+  clientName?: string
+  clientId?: string | number
+  buttonState?: string
 }
 
 function formatDate(date: Date): string {
@@ -24,26 +32,32 @@ function formatDate(date: Date): string {
     weekday: "long",
     year: "numeric",
     month: "long",
-    day: "numeric",
+    day: "numeric"
   })
 }
-
-export default function Event2({ title, description, time, host, location, image, lat, lng }: EventPageProps) {
-  let name;
-  useEffect(() => {
-    const fetchSession = async () => {
-      name = await getSession();
-      name = name?.user?.name;
-      console.log("session", name);
-    };
-    fetchSession();
-  }, [])
+let message = "";
+export default function Event2({ id, title, description, time, host, location, image, tags, lat, lng, clientName, clientId, buttonState }: EventPageProps) {
+  const { data: session, status } = useSession();
   const shareText = encodeURIComponent("Check out this interesting post!");
   const shareUrl = encodeURIComponent("https://exemplu.ro/postare");
   // Convert time to Date object if it's a string
   const eventStartHour = typeof time.startHour === "string" ? new Date(time) : time
   console.log(time);
-  const [clicked, setClicked] = useState(false);
+  const [clicked, setClicked] = useState(buttonState === "unclicked" ? false : true);
+
+  if (clicked === false) {
+    message = "Join the event!";
+  } else if (buttonState === "rejected") {
+    message = "You were rejected!";
+  } else if (buttonState === "accepted") {
+    message = "You were accepted!";
+  }
+  else if (buttonState === "host") {
+    message = "You are the host of the event!";
+  }
+  else if (buttonState === "requested" || clicked === true) {
+    message = "Your request was sent.";
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -60,6 +74,18 @@ export default function Event2({ title, description, time, host, location, image
             <h1 className="text-3xl md:text-4xl font-bold">{title}</h1>
           </div>
         </div>
+        {tags?.length > 0 && (
+          <div className="absolute top-4 right-4 flex flex-row items-end gap-2 z-10">
+            {tags.map((tag, index) => (
+              <span
+                key={index}
+                className="bg-black/70 text-white text-base px-3 py-1 rounded-full"
+              >
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -70,7 +96,9 @@ export default function Event2({ title, description, time, host, location, image
             </CardHeader>
             <CardContent>
               <div className="prose max-w-none">
-                <p className="whitespace-pre-line">{description}</p>
+                <p className="whitespace-pre-line break-words overflow-hidden">
+                  {description}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -191,7 +219,7 @@ export default function Event2({ title, description, time, host, location, image
           </Card>
 
         </div>
-        <button className="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-2xl px-6 py-2.5 shadow-md transition duration-200 ease-in-out w-full md:w-auto" onClick={async () => {
+        <button className="inline-flex items-center justify-center bg-emerald-500 hover:bg-emerald-600 text-white font-semibold rounded-2xl px-6 py-2.5 shadow-md transition duration-200 ease-in-out w-full md:w-auto" disabled={clicked} onClick={async () => {
           setClicked(true)
           const sendNofification = async () => {
             const now = new Date();
@@ -202,33 +230,25 @@ export default function Event2({ title, description, time, host, location, image
             const timezone = data.data.timezone;
             console.log("timezone", timezone);
 
-
-            const response = await fetch("http://localhost:3000/api/create-notification", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-
-              body: JSON.stringify({
-                notifications: [
-                  {
-                    title: "Request to Join Event",
-                    message: `User ${name} has requested to join your event "${title}". Would you like to approve their participation?`,
-                    date: formattedDate,
-                    purpose: "allow/deny",
-                    recipient: host,
-                    timezone,
-                  },
-                ],
-              }),
+            const response = await axios.post("http://localhost:3000/api/create-notification", {
+              notifications: [
+                {
+                  title: "Request to Join Event",
+                  message: `User ${clientName} has requested to join your event "${title}". Would you like to approve their participation?`,
+                  date: formattedDate,
+                  purpose: "allow/deny",
+                  recipient: host,
+                  timezone,
+                },
+              ],
             });
-            if (!response.ok) {
-              console.error("Error sending notification");
-            }
+
+            const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId: clientId, eventId: id, buttonState: "requested" })
+
           }
           await sendNofification();
         }}>
-          {clicked ? "Your request was sent." : "Join the event!"}
+          {message}
         </button>
 
       </div>

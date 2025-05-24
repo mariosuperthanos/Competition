@@ -51,8 +51,8 @@ const POST = async (req: Request) => {
         const zone = recipientTimezone?.timezone ?? 'UTC';
 
         const zonedDate = DateTime
-          .fromISO(n.date, { zone: 'utc' })  
-          .setZone(zone)                     
+          .fromISO(n.date, { zone: 'utc' })
+          .setZone(zone)
           .toFormat("yyyy-MM-dd'T'HH:mm:ss z");
 
         console.log(typeof zonedDate, zonedDate);

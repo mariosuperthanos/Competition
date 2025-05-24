@@ -14,12 +14,20 @@ import { format } from "path";
 import formatEventDate from "../../../../library/converters/customDate";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
+import { redirect } from "next/navigation";
 
 export default async function EventPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
-  }) {
+}) {
+  const session = await getServerSession(authOptions);
+  if (!session) {
+    redirect("/auth/login");
+  }
+  console.log(session)
+  const clientName = session?.user?.name;
+  const clientId = session.token.id;
   const { slug } = await params;
   console.log(slug);
 
@@ -37,6 +45,7 @@ export default async function EventPage({
   }
 
   const {
+    id,
     title,
     description,
     startHour,
@@ -47,7 +56,8 @@ export default async function EventPage({
     city,
     timezone,
     hostId,
-    hostName
+    hostName,
+    tags
   } = event;
 
 
@@ -65,7 +75,7 @@ export default async function EventPage({
   };
 
   const url = await getImageUrl(title);
-  
+
   const cookieStore = await cookies()
   const timezone1 = cookieStore.get('timezoneData');
   // console.log("timezone1", timezone1);
@@ -77,8 +87,20 @@ export default async function EventPage({
   const result = formatEventDate(time, userCountry, userCity, timezone, userTimezone);
   console.log("result", result);
 
+  let data = await prisma.eventRequest.findFirst({
+    where: {
+      userId: clientId,
+      eventId: id,
+    },
+    select: {
+      buttonState: true,
+    },
+  });
+  const buttonState = data !== null ? data.buttonState : "unclicked";
+  console.log("button state:", buttonState)
 
   const eventData = {
+    id,
     title,
     description,
     time: result,
@@ -86,7 +108,11 @@ export default async function EventPage({
     location: `${city}, ${country}`,
     image: "https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg",
     lat: latitude,
-    lng: longitude
+    lng: longitude,
+    tags,
+    clientId,
+    clientName,
+    buttonState
   };
 
   return (

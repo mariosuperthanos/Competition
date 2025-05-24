@@ -38,19 +38,33 @@ export default async function RootLayout({
     getServerSession(authOptions),
     cookies(),
   ]);
-  const hasUnread = await hasUnreadNotifications(session?.user.id);
-  console.log('hasUnread', hasUnread);
+
+  const encoded = cookieStore.get('timezoneData')?.value;
+  let decoded, timezoneData, timezone;
+  if (encoded) {
+    decoded = decodeURIComponent(encoded);
+    timezoneData = JSON.parse(decoded);
+    timezone = timezoneData.data.timezone;
+    console.log(timezone);
+  }
+
   const isCookie =
     cookieStore.get("timezoneData") == null ||
       cookieStore.get("timezoneData") == undefined
       ? false
       : true;
+  let hasUnread;
+  if (isCookie) {
+
+    hasUnread = await hasUnreadNotifications(session?.user.id, timezone);
+  }
+  console.log('hasUnread', hasUnread);
   console.log('isCookie', isCookie);
 
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-gray-100`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}
       >
         <Suspense fallback={<div>Loading...</div>}>
           <QueryProvider>
