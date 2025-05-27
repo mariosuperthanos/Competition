@@ -23,6 +23,8 @@ const uploadDir = "/tmp/uploads";
 
 export const POST = async (req: Request) => {
   try {
+    await fs.mkdir(uploadDir, { recursive: true });
+
     const userid = await checkJWT(req);
 
     const data = await getData(req);
