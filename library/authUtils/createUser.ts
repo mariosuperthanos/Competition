@@ -10,27 +10,34 @@ export const createUser = async (
   password: string,
 ) => {
   try {
-    // verify if the email already exists
-    const existingEmail = await prisma.user.findUnique({ where: { email } });
+    // Check if email already exists
+    const [existingEmail] = await Promise.all([
+      prisma.user.findUnique({ where: { email } }),
+      // existingUser(password, email),
+    ]);
+
     if (existingEmail) {
       throw new Error("There's already an account with this email!");
     }
 
-    // verify if the password already exists
-    const isPasswordUsed = await existingUser(password, email);
-    if (isPasswordUsed) {
-      throw new Error("This password has already been used!");
-    }
+    // if (isPasswordUsed) {
+    //   throw new Error("This password has already been used!");
+    // }
 
-    // hash the password
-    const hashedPassword = await hashPassword(password);
+    // Do these in parallel
+    const [hashedPassword, userTimezone] = await Promise.all([
+      hashPassword(password),
+      saveTimezone(),
+    ]);
 
-    // get user timezone
-    const userTimezone = await saveTimezone();
-
-    // add the user in the DB
+    // add the new user to the database
     const newUser = await prisma.user.create({
-      data: { name: username, email, password: hashedPassword, timezone: userTimezone?.timezone },
+      data: {
+        name: username,
+        email,
+        password: hashedPassword,
+        timezone: userTimezone?.timezone ?? null,
+      },
     });
 
     return { message: "Account created successfully!", user: newUser };

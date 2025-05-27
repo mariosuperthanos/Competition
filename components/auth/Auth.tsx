@@ -45,8 +45,6 @@ export function AuthForm({ className, ...props }: React.ComponentProps<"div">) {
       // API_URL for creating a user without creating a JWT token
       const API_URL = "http://localhost:3000/api/createUserCS";
 
-      const userTimezone = await saveTimezone();
-
       // Send request to create a new user
       const { data: newUserResponse } = await axios.post(API_URL, {
         username: values.username,
