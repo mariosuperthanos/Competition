@@ -231,7 +231,7 @@ export default function Event2({ id, title, description, time, host, location, i
             console.log("timezone", timezone);
             const csrfToken = await getCsrfToken();
 
-            const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/create-notification`, {
+            const response = await axios.post(`${window.location.origin}/api/create-notification`, {
               notifications: [
                 {
                   title: "Request to Join Event",
@@ -250,7 +250,7 @@ export default function Event2({ id, title, description, time, host, location, i
               withCredentials: true,
             })
 
-            const changeButtonState = await axios.post(`${process.env.NEXTAUTH_URL}/api/buttonState`, { userId: clientId, eventId: id, buttonState: "requested" }, {
+            const changeButtonState = await axios.post(`${window.location.origin}/api/buttonState`, { userId: clientId, eventId: id, buttonState: "requested" }, {
               headers: {
                 "Content-Type": "application/json",
                 "csrf-token": csrfToken,

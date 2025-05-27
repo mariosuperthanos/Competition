@@ -97,7 +97,7 @@ export default function TagSelectorModal({
     mutationFn: async () => {
       try {
         const csrfToken = await getCsrfToken()
-        const data = await axios.put(`${process.env.NEXTAUTH_URL}/api/addTagsToUser`, {
+        const data = await axios.put(`${window.location.origin}/api/addTagsToUser`, {
           tags: selectedTags
         }, {
           headers: {
