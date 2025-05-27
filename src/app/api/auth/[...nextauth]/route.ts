@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import prisma from "../../../../../lib/prisma";
-import { existingUser } from "../../../../../library/existingUser";
+import { existingUser } from "../../../../../library/authUtils/existingUser";
 import { error } from "console";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
@@ -17,22 +17,18 @@ interface CredentialsType {
 interface Token {
   id: string;
   email: string;
-  // Alte proprietăți necesare
 }
 
 interface User {
   id: string;
   email: string;
-  // Alte proprietăți ale utilizatorului
 }
 
-// Extinderea tipului JWT pentru a adăuga id și email
 interface CustomJWT extends JWT {
   id: string;
   email: string;
 }
 
-// Extinderea tipului Session pentru a include token-ul cu noile câmpuri
 interface CustomSession extends Session {
   token: CustomJWT;
 }
@@ -40,12 +36,12 @@ interface CustomSession extends Session {
 export const authOptions = {
   session: {
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 zile
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   jwt: {
-    secret: process.env.NEXTAUTH_SECRET,
+    secret: process.env.NEXTAUTH_SECRET, // encryption ket
     encryption: true,
-    algorithms: ["HS256"], // Specifică algoritmul RS256 pentru semnătura JWT
+    algorithms: ["HS256"], // JWT algorithm
   },
   cookies: {
     sessionToken: {
@@ -66,6 +62,7 @@ export const authOptions = {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
       },
+      // this is a login function used only by UI, not API auth
       async authorize(
         credentials: Record<"email" | "password", string> | undefined
       ) {
@@ -73,16 +70,19 @@ export const authOptions = {
         if (!credentials) {
           throw new Error("Credentials are missing");
         }
-
+        // verify if the user exists in DB
         const getUser = await existingUser(
           credentials.password,
           credentials.email
         );
-        // console.log("!!!!!!!!!!!!", getUser);
+
         if (getUser === undefined) {
           throw new Error("Could not log you in!");
         }
+
+        console.log("Get user is", getUser);
         return {
+          name: getUser.name,
           id: getUser.id,
           email: getUser.email,
         };
@@ -94,9 +94,11 @@ export const authOptions = {
   },
   callbacks: {
     async jwt({ token, user }) {
+      // store data in JWT token
       if (user) {
-        token.id = user.id; // Adaugă id-ul utilizatorului în token
-        token.email = user.email; // Adaugă email-ul utilizatorului în token
+        token.name = user.name;
+        token.id = user.id;
+        token.email = user.email;
       }
       return token;
     },

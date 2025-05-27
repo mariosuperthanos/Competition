@@ -3,6 +3,7 @@
 import { SessionProvider } from "next-auth/react";
 import { ReactNode } from "react";
 
+// It wraps the everything(it's used on all pages) into the SessionProvider
 export default function AuthProvider({
   children,
   session,

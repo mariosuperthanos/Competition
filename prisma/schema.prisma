@@ -5,8 +5,8 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
-  binaryTargets = ["native", "debian-openssl-3.0.x"]
+  provider      = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
 }
 
 datasource db {
@@ -15,25 +15,56 @@ datasource db {
 }
 
 model User {
-  id            String  @id @default(uuid())
-  name          String
-  email         String  @unique
-  password      String  @unique
-  // hostedEvents  Event[] @relation("UserEvents")
-  // plannedEvents Event[] @relation("Attendees")
+  id            String         @id @default(uuid())
+  name          String         @unique
+  email         String         @unique
+  password      String         @unique
+  hostedEvents  Event[]        @relation("UserEvents")
+  notifications Notification[] @relation("UserNotifications")
+  timezone      String         @default("Europe/Madrid")
+  eventRequests EventRequest[] // relația many-to-many cu state
+  tags          String[]       @default([])
 }
 
 model Event {
-  id          String   @id @default(uuid())
-  title       String
-  // hosts       User[]   @relation("UserEvents")
-  description String
-  date        String
-  startHour   String
-  finishHour  String
-  country     String
-  city        String
-  lat         Float
-  lng         Float
-  // attendees   User[]   @relation("Attendees")
+  id            String         @id @default(uuid())
+  title         String         @unique
+  description   String
+  date          String
+  startHour     String
+  finishHour    String
+  country       String
+  city          String
+  lat           Float
+  lng           Float
+  slug          String         @unique
+  timezone      String
+  hostId        String
+  host          User           @relation("UserEvents", fields: [hostId], references: [id])
+  hostName      String
+  tags          String[]       @default([])
+  eventRequests EventRequest[] // relația many-to-many cu state
+}
+
+model EventRequest {
+  id          String @id @default(uuid())
+  user        User   @relation(fields: [userId], references: [id])
+  userId      String
+  event       Event  @relation(fields: [eventId], references: [id])
+  eventId     String
+  buttonState String @default("notClicked") // "requested", "accepted", "rejected", "host". If the user didn't click that button than we dont save it in the table
+
+  @@unique([userId, eventId]) // ca să nu existe dubluri
+}
+
+model Notification {
+  id        String  @id @default(uuid())
+  title     String
+  message   String
+  date      String
+  purpose   String
+  read      Boolean @default(false)
+  recipient String
+  user      User    @relation("UserNotifications", fields: [recipient], references: [id])
+  responded Boolean @default(false)
 }

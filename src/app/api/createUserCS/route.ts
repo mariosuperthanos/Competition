@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server";
-import { createUser } from "../../../../library/createUser";
+import { createUser } from "../../../../library/authUtils/createUser";
 
 // this function create an user without returning JWT token
 export async function POST(req: Request) {
   try {
     const { password, email, username } = await req.json();
-    console.log(1);
+
     
     const createNewUser = await createUser(username, email, password);
     

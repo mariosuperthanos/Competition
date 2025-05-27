@@ -25,6 +25,7 @@ async function testCredentialsSignIn(email: string, password: string) {
     // console.log("Initial Cookies:", csrfCookies);
 
     // Step 3: Send a POST request to /api/auth/callback/test with CSRF token and cookies
+    // This is the part where the password and email get verfied
     const signInResponse = await fetch(
       `${baseUrl}/api/auth/callback/credentials`,
       {
@@ -51,8 +52,9 @@ async function testCredentialsSignIn(email: string, password: string) {
     // console.log("!!!!!!!!!!: ", signInCookies);
     // const combinedCookies = `${csrfCookies}; ${signInCookies}`;
     const returnedJWT = extractAuthCookie(signInCookies);
+    console.log("Returned JWT:", returnedJWT);
     // console.log("Session Info:", returnedJWT);
-    return returnedJWT;
+    return {returnedJWT, csrfToken: csrfCookies?.split(";")[0]};
   } catch (error) {
     console.error("Error:", error);
     return "Could not log you in!";
@@ -61,10 +63,10 @@ async function testCredentialsSignIn(email: string, password: string) {
 
 export async function POST(request: Request, response: Response) {
   const { password, email } = await request.json();
-  const result = await testCredentialsSignIn(email, password);
+  const { returnedJWT, csrfToken} = await testCredentialsSignIn(email, password);
   // console.log('!!!!: ', result);
-  if (result !== "Could not log you in!") {
-    return NextResponse.json({ message: "Login successfully", JWT: result }, { status: 200});
+  if (typeof returnedJWT !== null) {
+    return NextResponse.json({ message: "Login successfully", JWT: returnedJWT, csrfToken }, { status: 200 });
   }
   return NextResponse.json({ message: "Could not log you in!" }, { status: 401});
 }

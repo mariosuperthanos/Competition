@@ -1,11 +1,18 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "./globals.css";
+import './globals.css'
 import { getServerSession } from "next-auth";
 import AuthProvider from "../../components/auth/AuthProvider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
 import NavBar from "../../components/navbar/NavBar";
+import saveTimezone from "../../library/getUserData.ts/saveTimezone";
 // import 'leaflet/dist/leaflet.css';
+import { cookies } from "next/headers";
+import CookieSetter from "../../components/CookieSetter";
+import { Suspense } from "react";
+import LayoutContent from "../../components/LayoutContent";
+import QueryProvider from "../../components/QueryProvider";
+import hasUnreadNotifications from "../../library/notifications/hasUnread";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,16 +34,49 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await getServerSession(authOptions);
+  const [session, cookieStore] = await Promise.all([
+    getServerSession(authOptions),
+    cookies(),
+  ]);
+
+  const encoded = cookieStore.get('timezoneData')?.value;
+  let decoded, timezoneData, timezone;
+  if (encoded) {
+    decoded = decodeURIComponent(encoded);
+    timezoneData = JSON.parse(decoded);
+    timezone = timezoneData.data.timezone;
+    console.log(timezone);
+  }
+
+  const isCookie =
+    cookieStore.get("timezoneData") == null ||
+      cookieStore.get("timezoneData") == undefined
+      ? false
+      : true;
+  let hasUnread;
+  if (isCookie) {
+
+    hasUnread = await hasUnreadNotifications(session?.user.id, timezone);
+  }
+  console.log('hasUnread', hasUnread);
+  console.log('isCookie', isCookie);
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}
       >
-        <div style={{ paddingTop: "13px", paddingLeft: "13px" }}>
-          <NavBar />
-        </div>
-        <AuthProvider session={session}>{children}</AuthProvider>
+        <Suspense fallback={<div>Loading...</div>}>
+          <QueryProvider>
+            <LayoutContent
+              session={session}
+              initialCookieState={isCookie}
+              hasUnread={hasUnread}
+            >
+              {children}
+            </LayoutContent>
+          </QueryProvider>
+        </Suspense>
       </body>
     </html>
   );
