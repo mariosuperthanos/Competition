@@ -19,7 +19,7 @@ import parseImage from "../../../../library/create-eventAPI/parseImage";
 import sharpImage from "../../../../library/create-eventAPI/sharpImage";
 import uploadFile from "../../../../library/create-eventAPI/addImageToS3";
 
-const uploadDir = path.join(process.cwd(), "tmp/uploads");
+const uploadDir = "/tmp/uploads";
 
 export const POST = async (req: Request) => {
   try {
