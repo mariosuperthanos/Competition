@@ -23,14 +23,14 @@ const resolvers = {
       return event;
     },
     events: async (_parent: any, args: any, context: Context) => {
-        return await fetchFilteredEvents(context.prisma, {
-          contains: args.contains,
-          city: args.city,
-          country: args.country,
-          date: args.date,
-          tags: args.tags,
-          page: args.page,
-        });
+        // return await fetchFilteredEvents(context.prisma, {
+        //   contains: args.contains,
+        //   city: args.city,
+        //   country: args.country,
+        //   date: args.date,
+        //   tags: args.tags,
+        //   page: args.page,
+        // });
     }
   },
 };

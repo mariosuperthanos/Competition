@@ -11,7 +11,6 @@ type FetchEventParams = {
 };
 
 export async function fetchFilteredEvents(
-  prisma: any,
   {
     contains = "",
     city = "",
@@ -23,6 +22,14 @@ export async function fetchFilteredEvents(
 ) {
   const shortDate = date?.slice(0, 10) || "";
   const filters: any[] = [];
+  console.log("fetchFilteredEvents called with params:", {
+    contains,
+    city,
+    country,
+    date,
+    tags,
+    page,
+  });
 
   if (contains) {
     filters.push({
@@ -67,17 +74,28 @@ export async function fetchFilteredEvents(
     });
   }
 
-  const events = await prisma.event.findMany({
+  const eventsRaw = await prisma.event.findMany({
     where: {
       AND: filters,
     },
     skip: (page - 1) * 10,
     take: 11,
   });
+  console.log("eventsRaw", eventsRaw);
 
-  if (!events || events.length === 0) {
+  if (!eventsRaw || eventsRaw.length === 0) {
     throw new Error("Error from the server");
   }
+
+  const events = await Promise.all(
+    eventsRaw.slice(0, 11).map(async (event) => {
+      const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg';
+      return {
+        ...event,
+        image,
+      };
+    })
+  );
 
   return events;
 }

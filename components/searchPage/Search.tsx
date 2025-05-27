@@ -1,5 +1,6 @@
-"use client";
+'use client';
 
+import { useRouter } from 'next/navigation';
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { format } from "date-fns";
@@ -11,9 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
-import { useQuery } from "@tanstack/react-query";
 import { useRef, useState } from "react";
-import useStore from "../../zustand/store";
 import getImageUrl from "../../library/searchEvents/getS3Image";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -24,6 +23,26 @@ import removeDiacritics from "../../library/converters/removeDiacritics";
 import axios from "axios";
 import TagSelector from "../testFolder/tagsSelector";
 
+function buildSearchUrl(params: {
+  contains?: string;
+  city?: string;
+  country?: string;
+  date?: string;
+  tags?: string[];
+  page?: number;
+}) {
+  const { contains = "", city = "", country = "", date = "", tags = [], page = 1 } = params;
+  const searchParams = new URLSearchParams();
+
+  if (contains) searchParams.append("contains", contains);
+  if (city) searchParams.append("city", city);
+  if (country) searchParams.append("country", country);
+  if (date) searchParams.append("date", date);
+  if (tags.length > 0) tags.forEach(tag => searchParams.append("tags", tag));
+  if (page && page > 1) searchParams.append("page", String(page));
+
+  return `/search-events?${searchParams.toString()}`;
+}
 
 const formSchema = z.object({
   eventName: z.string(),
@@ -32,36 +51,7 @@ const formSchema = z.object({
   date: z.date(),
 });
 
-// GraphQL query
-export const EVENTS_QUERY = `
-  query GetEvents(
-    $contains: String
-    $city: String
-    $country: String
-    $date: String
-    $tags: [String!]
-    $page: Int
-  ) {
-    events(
-      contains: $contains
-      city: $city
-      country: $country
-      date: $date
-      tags: $tags
-      page: $page
-    ) {
-      id
-      title
-      city
-      country
-      startHour
-      tags
-      description
-      slug
-      timezone
-    }
-  }
-`;
+
 
 
 
@@ -107,67 +97,11 @@ let searchParams = {
   country: "",
   city: "",
   date: "",
-  refresh: true
 };
 
 export default function EventSearchForm() {
+  const router = useRouter();
   const [selectedTags, setSelectedTags] = useState([]);
-
-  // Setup the query with the searchParams dependency
-  const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['events'],
-    queryFn: async () => {
-      if (!searchParams) return { data: { events: [] } };
-
-      const copy = {
-        contains: searchParams.contains,
-        city: searchParams.city,
-        country: searchParams.country,
-        date: searchParams.date,
-        tags: selectedTags
-      };
-      useStore.setState({ searchCriteria: { copy } });
-      useStore.setState({ tags: selectedTags });
-
-      const result = await axios.post("http://localhost:3000/api/graphql", {
-        query: EVENTS_QUERY,
-        variables: copy,
-      }, {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-      if (result.data.data === null) {
-        throw new Error('No events were found with the provided criteria');
-      }
-      console.log("GraphQL result:", result); // Log the result for debugging
-      const rawEvents = result.data.data.events;
-      console.log("search events length", rawEvents.length)
-
-      if (rawEvents.length === 11) {
-        useStore.setState({ isNextPage: true })
-      } else {
-        useStore.setState({ isNextPage: false })
-      }
-
-      const events = await Promise.all(
-        rawEvents.map(async (event) => {
-          // const image = await getImageUrl(event.title);
-          const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg'
-          return {
-            ...event,
-            image,
-          };
-        })
-      );
-      useStore.setState({ events });
-      console.log("GraphQL response:", result.data.events); // Log the response for debugging
-      return result;  // Return result only once
-    },
-    enabled: false,
-    retry: false
-  });
-  console.log("use query error", error);
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -177,6 +111,7 @@ export default function EventSearchForm() {
       date: "",
     },
   });
+
 
   const validate = async (value: string, mode: "country" | "city") => {
     try {
@@ -230,11 +165,19 @@ export default function EventSearchForm() {
       country: values.country,
       date: values.date !== "" ? values.date.toISOString() : "", // Toggle refresh to trigger re-fetch
     };
-    refetch();
+    const copy = {
+      contains: searchParams.contains,
+      city: searchParams.city,
+      country: searchParams.country,
+      date: searchParams.date,
+      tags: selectedTags
+    };
+    
+
+    const url = buildSearchUrl(copy);
+    router.push(url);
   }
 
-  // Access events data
-  const events = data?.data?.events || [];
 
   return (
     <div className="w-full max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-md sm:w-full mb-6">
@@ -383,19 +326,11 @@ export default function EventSearchForm() {
           <Button
             type="submit"
             className="w-full bg-black text-white hover:bg-black/80 transition-colors duration-200 ease-in-out"
-            disabled={isLoading}
           >
-            {isLoading ? "Searching..." : "Search"}
+            Search
           </Button>
         </form>
       </Form>
-
-      {/* Display results */}
-      {error && (
-        <div className="mt-6 p-4 border border-red-300 bg-red-50 text-red-700 rounded">
-          {error.toString()}
-        </div>
-      )}
 
       {/* {searchParams && events.length === 0 && !isLoading && !error && (
         <div className="mt-6 p-4 border border-gray-200 bg-gray-50 rounded">
