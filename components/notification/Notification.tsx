@@ -62,8 +62,8 @@ export function Notification({ id, title, message, date, isSeen, purpose }: Noti
     }
     try {
       const csrfToken = await getCsrfToken();
-      const URL = "http://localhost:3000/api/create-notification";
-      const changeButtonState = await axios.post("http://localhost:3000/api/buttonStateOnName", { title, clientName: name, buttonState: response, id }, {
+      const URL = `${process.env.NEXTAUTH_URL}/api/create-notification`;
+      const changeButtonState = await axios.post(`${process.env.NEXTAUTH_URL}/api/buttonStateOnName`, { title, clientName: name, buttonState: response, id }, {
         headers: {
           "Content-Type": "application/json",
           "csrf-token": csrfToken,

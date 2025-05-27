@@ -7,11 +7,9 @@ function extractAuthCookie(cookieString: string) {
 
 
 async function testCredentialsSignIn(email: string, password: string) {
-  const baseUrl = "http://localhost:3000"; // The base URL of your local development server
-
   try {
     // Step 1: Get the CSRF Token
-    const csrfResponse = await fetch(`${baseUrl}/api/auth/csrf`);
+    const csrfResponse = await fetch(`${process.env.NEXTAUTH_URL}/api/auth/csrf`);
     if (!csrfResponse.ok) {
       throw new Error("Failed to fetch CSRF token");
     }
@@ -27,7 +25,7 @@ async function testCredentialsSignIn(email: string, password: string) {
     // Step 3: Send a POST request to /api/auth/callback/test with CSRF token and cookies
     // This is the part where the password and email get verfied
     const signInResponse = await fetch(
-      `${baseUrl}/api/auth/callback/credentials`,
+      `${process.env.NEXTAUTH_URL}/api/auth/callback/credentials`,
       {
         method: "POST",
         headers: {

@@ -142,7 +142,7 @@ const CreateUserComp = () => {
       // console.log(formData.file);
       console.log('13131', formData);
 
-      const response = await axios.post("http://localhost:3000/api/createEvent", formData, {
+      const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/createEvent`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "csrf-token": csrfToken,
@@ -151,7 +151,7 @@ const CreateUserComp = () => {
       });
       const eventId = response.data.data.id;
       console.log("eventId", eventId)
-      const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId, eventId, buttonState: "host" }, {
+      const changeButtonState = await axios.post(`${process.env.NEXTAUTH_URL}/api/buttonState`, { userId, eventId, buttonState: "host" }, {
         headers: {
           "Content-Type": "application/json",
           "csrf-token": csrfToken,

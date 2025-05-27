@@ -11,7 +11,7 @@ const ExpireNotifications = ({ idsToUpdate }) => {
       try {
         const csrfToken = await getCsrfToken();
         await axios.post(
-          "http://localhost:3000/api/expire-notifications",
+          `${process.env.NEXTAUTH_URL}:3000/api/expire-notifications`,
           { ids: idsToUpdate },
           {
             headers: {

@@ -37,7 +37,7 @@ export const POST = async (req: Request | null) => {
 
 
     // signIn from nextAuth is not allowed in server side
-    const loginToken = await axios.post("http://localhost:3000/api/login", {
+    const loginToken = await axios.post(`${process.env.NEXTAUTH_URL}/api/login`, {
       email,
       password,
       json: true,
