@@ -1,10 +1,12 @@
 import { error } from "console";
 import prisma from "../../../../lib/prisma";
 import { NextResponse } from "next/server";
+import checkJWT from "../../../../library/create-eventAPI/checkJWT";
 
 export async function POST(request: Request, response: Response) {
   const { message, date, purpose, userId, title } = await request.json();
   try {
+    await checkJWT(request);
     await prisma.notification.create({
       data: {
         message,

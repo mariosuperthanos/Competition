@@ -7,7 +7,7 @@ import { DateTime } from "luxon";
 
 const POST = async (req: Request) => {
   try {
-    const userid = await checkJWT();
+    const userid = await checkJWT(req);
 
     const body = await req.json();
     const notifications: {

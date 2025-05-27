@@ -34,7 +34,7 @@ import MapComponent from "../event/Map";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { timeToMinutes } from "../../library/converters/timeToMinutes";
 import { formSchema } from "../../library/schemas/create-event";
-import { useSession } from "next-auth/react";
+import { getCsrfToken, useSession } from "next-auth/react";
 import formatData from "../../library/converters/formatData";
 import convertObjToForm from "../../library/converters/convertObjToForm";
 import getTimeZone from "../../library/converters/getTimeZone";
@@ -97,16 +97,16 @@ const CreateUserComp = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: "Python meeting",
-      description: "gkdjfkgjdkgkdfnglsgklnsklgksgdg",
+      title: "",
+      description: "",
       date: undefined,
       startHour: "",
-      finishHour: "12:00 PM",
-      country: "Romania",
+      finishHour: "",
+      country: "",
       city: "",
       map: false,
-      lat: "40",
-      lng: "26",
+      lat: "",
+      lng: "",
       timezone: "",
     },
   });
@@ -121,6 +121,8 @@ const CreateUserComp = () => {
 
       const timezone = await getTimeZone(parseFloat(data.lat), parseFloat(data.lng));
       const { country, city } = await getLocation(parseFloat(data.lat), parseFloat(data.lng));
+      const csrfToken = await getCsrfToken();
+      console.log("csrfToken", csrfToken);
 
       valuesCopy.country = removeDiacritics(country);
       valuesCopy.city = removeDiacritics(city);
@@ -143,11 +145,19 @@ const CreateUserComp = () => {
       const response = await axios.post("http://localhost:3000/api/createEvent", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "csrf-token": csrfToken,
         },
+        withCredentials: true,
       });
       const eventId = response.data.data.id;
-      console.log("eventId",eventId)
-      const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId, eventId, buttonState: "host"})
+      console.log("eventId", eventId)
+      const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId, eventId, buttonState: "host" }, {
+        headers: {
+          "Content-Type": "application/json",
+          "csrf-token": csrfToken,
+        },
+        withCredentials: true,
+      })
       console.log(response.data);
       return slugHref;
     }, onError: (error) => {

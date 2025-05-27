@@ -13,6 +13,7 @@ import {
 import { cn } from "@/lib/utils"
 import { useMutation } from "@tanstack/react-query"
 import axios from "axios"
+import { getCsrfToken } from "next-auth/react"
 
 interface TagSelectorProps {
   tags: string[]
@@ -95,9 +96,15 @@ export default function TagSelectorModal({
   const mutation = useMutation({
     mutationFn: async () => {
       try {
+        const csrfToken = await getCsrfToken()
         const data = await axios.put('http://localhost:3000/api/addTagsToUser', {
-          userId,
           tags: selectedTags
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+            "csrf-token": csrfToken,
+          },
+          withCredentials: true,
         })
       } catch (err) {
         console.error(err);

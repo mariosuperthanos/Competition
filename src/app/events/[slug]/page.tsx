@@ -7,23 +7,27 @@ import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { cookies } from 'next/headers'
 import getImageUrl from "../../../../library/searchEvents/getS3Image";
-import Event2 from "../../../../components/test";
+import Event2 from "../../../../components/test1";
 import CreateEventPage from "@/app/create-event/page";
-import Postare from "../../../../components/test";
+import Postare from "../../../../components/test1";
 import { format } from "path";
 import formatEventDate from "../../../../library/converters/customDate";
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
+import checkJWT from "../../../../library/create-eventAPI/checkJWT";
 
 export default async function EventPage({
   params,
 }: {
   params: Promise<{ slug: string }>;
-}) {
-  const session = await getServerSession(authOptions);
-  if (!session) {
-    redirect("/auth/login");
+  }) {
+  let session;
+  try {
+    await checkJWT();
+    session = await getServerSession(authOptions);
+  } catch (err) {
+    return redirect("/auth/login");
   }
   console.log(session)
   const clientName = session?.user?.name;

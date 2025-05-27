@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { useMutation } from "@tanstack/react-query"
-import { useSession } from "next-auth/react"
+import { getCsrfToken, useSession } from "next-auth/react"
 import axios from "axios"
 
 const interestTags = [
@@ -50,14 +50,26 @@ export default function TagSelectorPageComp({ onSelectionChange, maxSelections =
   const mutation = useMutation({
     mutationFn: async () => {
       try {
-        const data = await axios.put('http://localhost:3000/api/addTagsToUser', {
-          userId: session?.token.id,
+        const csrfToken = await getCsrfToken();
+        console.log("CSRF Token:", csrfToken);
+        console.log("Selected Tags:", selectedTags);
+        console.log("User ID:", session?.token.id);
+        const data = await axios.post('http://localhost:3000/api/addTagsToUser', {
           tags: selectedTags
+        }, {
+          headers: {
+            "Content-Type": "application/json",
+            "csrf-token": csrfToken,
+          },
+          withCredentials: true,
         })
       } catch (err) {
         console.error(err);
       }
-    }
+    },
+    onSuccess: () => {
+      window.location.href = "/";
+    },
   })
 
   const filteredTags = interestTags.filter((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
@@ -219,12 +231,11 @@ export default function TagSelectorPageComp({ onSelectionChange, maxSelections =
                       disabled={isMaxReached}
                       className={`
                         relative p-3 rounded-xl border-2 transition-all duration-200 text-sm font-medium
-                        ${
-                          isSelected
-                            ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md scale-105"
-                            : isMaxReached
-                              ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
-                              : `border-gray-200 ${getTagColor(tag)} hover:scale-105 hover:shadow-md`
+                        ${isSelected
+                          ? "border-indigo-500 bg-indigo-50 text-indigo-700 shadow-md scale-105"
+                          : isMaxReached
+                            ? "border-gray-200 bg-gray-50 text-gray-400 cursor-not-allowed"
+                            : `border-gray-200 ${getTagColor(tag)} hover:scale-105 hover:shadow-md`
                         }
                       `}
                     >
@@ -267,13 +278,13 @@ export default function TagSelectorPageComp({ onSelectionChange, maxSelections =
             disabled={selectedTags.length === 0}
             onClick={() => {
               mutation.mutate();
-              window.location.href = "/";
+              // window.location.href = "/";
             }}
           >
             Save Interests ({selectedTags.length})
           </Button>
         </div>
-        
+
       </div>
     </div>
   )

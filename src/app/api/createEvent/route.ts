@@ -23,7 +23,7 @@ const uploadDir = path.join(process.cwd(), "tmp/uploads");
 
 export const POST = async (req: Request) => {
   try {
-    const userid = await checkJWT();
+    const userid = await checkJWT(req);
 
     const data = await getData(req);
     console.log("data", typeof data.tags);

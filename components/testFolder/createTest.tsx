@@ -12,7 +12,7 @@ import removeDiacritics from "../../library/converters/removeDiacritics"
 import MapComponent from "../event/Map"
 import "mapbox-gl/dist/mapbox-gl.css"
 import { formSchema } from "../../library/schemas/create-event"
-import { useSession } from "next-auth/react"
+import { getCsrfToken, useSession } from "next-auth/react"
 import formatData from "../../library/converters/formatData"
 import convertObjToForm from "../../library/converters/convertObjToForm"
 import getTimeZone from "../../library/converters/getTimeZone"
@@ -107,10 +107,14 @@ const CreateUserComp = () => {
       // console.log(formData.file);
       console.log("13131", formData)
 
+      const csrfToken = await getCsrfToken();
+
       const response = await axios.post("http://localhost:3000/api/createEvent", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
+          "csrf-token": csrfToken,
         },
+        withCredentials: true,
       })
       console.log(response.data)
       return response.data

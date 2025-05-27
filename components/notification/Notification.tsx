@@ -7,6 +7,7 @@ import { Bell } from "lucide-react"
 import { DateTime } from "luxon"
 import axios from "axios"
 import Cookies from 'js-cookie';
+import { getCsrfToken } from "next-auth/react"
 
 
 interface NotificationProps {
@@ -60,12 +61,25 @@ export function Notification({ id, title, message, date, isSeen, purpose }: Noti
       }
     }
     try {
+      const csrfToken = await getCsrfToken();
       const URL = "http://localhost:3000/api/create-notification";
-      const changeButtonState = await axios.post("http://localhost:3000/api/buttonStateOnName", { title, clientName: name, buttonState: response, id })
-      const data = await axios.post(URL, body)
+      const changeButtonState = await axios.post("http://localhost:3000/api/buttonStateOnName", { title, clientName: name, buttonState: response, id }, {
+        headers: {
+          "Content-Type": "application/json",
+          "csrf-token": csrfToken,
+        },
+        withCredentials: true,
+      })
+      const data = await axios.post(URL, body, {
+        headers: {
+          "Content-Type": "application/json",
+          "csrf-token": csrfToken,
+        },
+        withCredentials: true,
+      })
     } catch (err) {
       console.log(err);
-    } 
+    }
   }
 
   const formattedDate = formatDistanceToNow(jsDate, { addSuffix: true });

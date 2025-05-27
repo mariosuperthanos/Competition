@@ -5,10 +5,18 @@ import prisma from "../../../lib/prisma";
 import { cookies } from "next/headers";
 import { DateTime } from "luxon";
 import ExpireNotifications from "../../../components/ExpireNotifications";
+import checkJWT from "../../../library/create-eventAPI/checkJWT";
+import { redirect } from "next/navigation";
 
 // purpose can be: "allow/reject", "response to allow/reject", "ask for particitation"
 
 export default async function NotificationsPage() {
+  try {
+    await checkJWT();
+  } catch (err) {
+    return redirect("/auth/login");
+  }
+
   const cookieStore = await cookies();
   const timezoneData = cookieStore.get("timezoneData")?.value;
   const parsedData = JSON.parse(timezoneData!);
@@ -94,7 +102,7 @@ export default async function NotificationsPage() {
             message={notification.message}
             date={notification.date}
             isSeen={!notification.read}
-            purpose={notification.responded == true ? "" : notification.purpose }
+            purpose={notification.responded == true ? "" : notification.purpose}
             id={notification.id}
           />
         );

@@ -1,8 +1,10 @@
 import { NextResponse } from "next/server";
 import prisma from "../../../../lib/prisma";
+import checkJWT from "../../../../library/create-eventAPI/checkJWT";
 
 export async function POST(req: Request) {
   try {
+    await checkJWT(req);
     const body = await req.json();
     console.log("Received body:", body);
     const { userId, eventId, buttonState } = body;

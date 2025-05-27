@@ -2,18 +2,25 @@
 
 import { use, useEffect } from "react";
 import prisma from "../lib/prisma";
+import { getCsrfToken } from "next-auth/react";
+import axios from "axios";
 
 const ExpireNotifications = ({ idsToUpdate }) => {
   useEffect(() => {
     const expire = async () => {
       try {
-        await fetch("http://localhost:3000/api/expire-notifications", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({ ids: idsToUpdate })
-        });
+        const csrfToken = await getCsrfToken();
+        await axios.post(
+          "http://localhost:3000/api/expire-notifications",
+          { ids: idsToUpdate },
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "csrf-token": csrfToken
+            },
+            withCredentials: true,
+          }
+        );
       } catch (error) {
         console.error("Failed to expire notifications", error);
       }

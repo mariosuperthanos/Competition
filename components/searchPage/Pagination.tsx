@@ -116,7 +116,7 @@ export default function PaginationButtons({ nextServer, initialPage = 1, onPageC
   };
 
   return (
-    <div className="flex items-center justify-center space-x-2">
+    <div className="flex items-center justify-center space-x-2 mt-2">
       {currentPage > 1 && (
         <button
           onClick={handlePrevious}

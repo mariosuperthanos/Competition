@@ -6,7 +6,7 @@ import Image from "next/image"
 import MapComponent from "./event/Map";
 import { useEffect, useState } from "react";
 import Cookie from 'js-cookie';
-import { getSession, useSession } from "next-auth/react";
+import { getCsrfToken, getSession, useSession } from "next-auth/react";
 import { getServerSession } from "next-auth";
 import axios from "axios";
 
@@ -229,6 +229,7 @@ export default function Event2({ id, title, description, time, host, location, i
             const data = JSON.parse(timezoneJSON!);
             const timezone = data.data.timezone;
             console.log("timezone", timezone);
+            const csrfToken = await getCsrfToken();
 
             const response = await axios.post("http://localhost:3000/api/create-notification", {
               notifications: [
@@ -241,9 +242,21 @@ export default function Event2({ id, title, description, time, host, location, i
                   timezone,
                 },
               ],
-            });
+            }, {
+              headers: {
+                "Content-Type": "application/json",
+                "csrf-token": csrfToken,
+              },
+              withCredentials: true,
+            })
 
-            const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId: clientId, eventId: id, buttonState: "requested" })
+            const changeButtonState = await axios.post("http://localhost:3000/api/buttonState", { userId: clientId, eventId: id, buttonState: "requested" }, {
+              headers: {
+                "Content-Type": "application/json",
+                "csrf-token": csrfToken,
+              },
+              withCredentials: true,
+            })
 
           }
           await sendNofification();

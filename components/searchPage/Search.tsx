@@ -102,14 +102,20 @@ const interestTags = [
 ]
 
 let firstTime = true;
+let searchParams = {
+  contains: "",
+  country: "",
+  city: "",
+  date: "",
+  refresh: true
+};
 
 export default function EventSearchForm() {
   const [selectedTags, setSelectedTags] = useState([]);
-  const [searchParams, setSearchParams] = useState<SearchParams | null>(null);
 
   // Setup the query with the searchParams dependency
-  const { data, isLoading, error } = useQuery({
-    queryKey: ['events', searchParams],
+  const { data, isLoading, error, refetch } = useQuery({
+    queryKey: ['events'],
     queryFn: async () => {
       if (!searchParams) return { data: { events: [] } };
 
@@ -123,34 +129,25 @@ export default function EventSearchForm() {
       useStore.setState({ searchCriteria: { copy } });
       useStore.setState({ tags: selectedTags });
 
-      const response = await fetch("http://localhost:3000/api/graphql", {
-        method: "POST",
+      const result = await axios.post("http://localhost:3000/api/graphql", {
+        query: EVENTS_QUERY,
+        variables: copy,
+      }, {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          query: EVENTS_QUERY,
-          variables: copy,
-        }),
       });
-
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const result = await response.json();
-      if (!result.data) {
-        throw new Error("No events found with the provided criteria.");
+      if (result.data.data === null) {
+        throw new Error('No events were found with the provided criteria');
       }
       console.log("GraphQL result:", result); // Log the result for debugging
-      const rawEvents = result.data.events;
+      const rawEvents = result.data.data.events;
       console.log("search events length", rawEvents.length)
 
       if (rawEvents.length === 11) {
-        useStore.setState({ isNextPage: true})
+        useStore.setState({ isNextPage: true })
       } else {
-        useStore.setState({ isNextPage: false})
+        useStore.setState({ isNextPage: false })
       }
 
       const events = await Promise.all(
@@ -167,8 +164,10 @@ export default function EventSearchForm() {
       console.log("GraphQL response:", result.data.events); // Log the response for debugging
       return result;  // Return result only once
     },
-    enabled: !!searchParams, // Only run when searchParams exists
+    enabled: false,
+    retry: false
   });
+  console.log("use query error", error);
 
   const form = useForm<z.infer<typeof formSchema>>({
     defaultValues: {
@@ -225,13 +224,13 @@ export default function EventSearchForm() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     // Update search parameters to trigger the query
-    setSearchParams((prev) => ({
+    searchParams = {
       contains: values.eventName,
       city: values.city,
       country: values.country,
-      date: values.date !== "" ? values.date.toISOString() : "",
-      refresh: !prev?.refresh, // Toggle refresh to trigger re-fetch
-    }));
+      date: values.date !== "" ? values.date.toISOString() : "", // Toggle refresh to trigger re-fetch
+    };
+    refetch();
   }
 
   // Access events data
