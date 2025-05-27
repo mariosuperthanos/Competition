@@ -109,7 +109,7 @@ const CreateUserComp = () => {
 
       const csrfToken = await getCsrfToken();
 
-      const response = await axios.post("http://localhost:3000/api/createEvent", formData, {
+      const response = await axios.post(`${process.env.NEXTAUTH_URL}/api/createEvent`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
           "csrf-token": csrfToken,

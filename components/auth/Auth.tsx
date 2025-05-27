@@ -43,7 +43,7 @@ export function AuthForm({ className, ...props }: React.ComponentProps<"div">) {
   async function signUpHandler(values: z.infer<typeof formSchema>) {
     try {
       // API_URL for creating a user without creating a JWT token
-      const API_URL = "http://localhost:3000/api/createUserCS";
+      const API_URL = `${process.env.NEXTAUTH_URL}/api/createUserCS`;
 
       // Send request to create a new user
       const { data: newUserResponse } = await axios.post(API_URL, {
