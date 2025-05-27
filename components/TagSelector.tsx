@@ -54,7 +54,7 @@ export default function TagSelectorPageComp({ onSelectionChange, maxSelections =
         console.log("CSRF Token:", csrfToken);
         console.log("Selected Tags:", selectedTags);
         console.log("User ID:", session?.token.id);
-        const data = await axios.post(`${process.env.NEXTAUTH_URL}/api/addTagsToUser`, {
+        const data = await axios.post(`${window.location.origin}/api/addTagsToUser`, {
           tags: selectedTags
         }, {
           headers: {

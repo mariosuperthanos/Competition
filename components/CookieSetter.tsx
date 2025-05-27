@@ -7,7 +7,7 @@ const CookieSetter = ({ onComplete }) => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get(`${process.env.NEXTAUTH_URL}/api/saveTimezoneUtil`);
+        const { data } = await axios.get(`${window.location.origin}/api/saveTimezoneUtil`);
         Cookies.set("timezoneData", JSON.stringify(data), {
           path: "/",           // vizibil în tot site-ul
           sameSite: "Lax",     // permite navigări normale
