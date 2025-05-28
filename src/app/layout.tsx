@@ -2,13 +2,9 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import './globals.css'
 import { getServerSession } from "next-auth";
-import AuthProvider from "../../components/auth/AuthProvider";
 import { authOptions } from "./api/auth/[...nextauth]/route";
-import NavBar from "../../components/navbar/NavBar";
-import saveTimezone from "../../library/getUserData.ts/saveTimezone";
 // import 'leaflet/dist/leaflet.css';
 import { cookies } from "next/headers";
-import CookieSetter from "../../components/CookieSetter";
 import { Suspense } from "react";
 import LayoutContent from "../../components/LayoutContent";
 import QueryProvider from "../../components/QueryProvider";
@@ -54,11 +50,10 @@ export default async function RootLayout({
       ? false
       : true;
   let hasUnread;
+  console.log('session?.user.id', session);
   if (isCookie) {
-
-    hasUnread = await hasUnreadNotifications(session?.user.id, timezone);
+    hasUnread = await hasUnreadNotifications(session?.token.id, timezone);
   }
-  console.log('hasUnread', hasUnread);
   console.log('isCookie', isCookie);
 
   return (

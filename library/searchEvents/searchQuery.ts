@@ -83,9 +83,9 @@ export async function fetchFilteredEvents(
   });
   console.log("eventsRaw", eventsRaw);
 
-  if (!eventsRaw || eventsRaw.length === 0) {
-    throw new Error("Error from the server");
-  }
+  // if (!eventsRaw || eventsRaw.length === 0) {
+  //   throw new Error("Error from the server");
+  // }
 
   const events = await Promise.all(
     eventsRaw.slice(0, 11).map(async (event) => {

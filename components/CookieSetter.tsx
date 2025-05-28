@@ -1,5 +1,4 @@
 import { useEffect } from "react";
-import saveTimezone from "../library/getUserData.ts/saveTimezone";
 import axios from "axios";
 import Cookies from "js-cookie";
 

@@ -4,6 +4,8 @@ import { authOptions } from "../auth/[...nextauth]/route";
 import { getServerSession } from "next-auth";
 import checkJWT from "../../../../library/create-eventAPI/checkJWT";
 import { DateTime } from "luxon";
+import getRecipientTimezoneAndId from "../../../../library/create-notifications/getRecipientTimezone";
+import createManyNotifications from "../../../../library/create-notifications/createManyNotifications";
 
 const POST = async (req: Request) => {
   try {
@@ -24,47 +26,10 @@ const POST = async (req: Request) => {
     }
 
     // get the recipient timezone by name
-    const recipientTimezone = await prisma.user.findUnique({
-      where: {
-        name: notifications[0].recipient,
-      },
-      select: {
-        timezone: true,
-      },
-    });
-
-    const recipientId = await prisma.user.findUnique({
-      where: {
-        name: notifications[0].recipient,
-      },
-      select: {
-        id: true,
-      },
-    });
-    console.log("recipientId", recipientId);
-
-    console.log("recipientTimezone", recipientTimezone);
+    const { recipientTimezone, recipientId } = await getRecipientTimezoneAndId(notifications[0].recipient);
 
 
-    await prisma.notification.createMany({
-      data: notifications.map((n) => {
-        const zone = recipientTimezone?.timezone ?? 'UTC';
-
-        const zonedDate = DateTime
-          .fromISO(n.date, { zone: 'utc' })
-          .setZone(zone)
-          .toFormat("yyyy-MM-dd'T'HH:mm:ss z");
-
-        console.log(typeof zonedDate, zonedDate);
-        return {
-          title: n.title,
-          message: n.message,
-          date: zonedDate,
-          purpose: n.purpose,
-          recipient: recipientId?.id ?? "unknown",
-        };
-      }),
-    });
+    await createManyNotifications(notifications, recipientTimezone, recipientId);
 
     return NextResponse.json({ message: "Notifications created" }, { status: 201 });
   } catch (err: any) {

@@ -1,10 +1,11 @@
-import { Check, Mic, Users, Calendar, MapPin, Music, Film, Book, Coffee, Utensils } from "lucide-react"
+'use client'
+
+import { Calendar, MapPin } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import slugify from "slugify"
 import Link from "next/link"
+import Image from "next/image"
 
 const FeaturedEvent = ({ title, description, city, country, date, tags }) => {
   const formattedDate = new Date(date).toLocaleString("en-US", {
@@ -17,15 +18,18 @@ const FeaturedEvent = ({ title, description, city, country, date, tags }) => {
     hour12: true,
   });
 
-  const href = `/events/`+ slugify(title, { lower: true })
+  const href = `/events/` + slugify(title, { lower: true })
 
   return (
     <section className="mb-12">
       <div className="relative rounded-xl overflow-hidden">
-        <img
+        <Image
           src="https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg"
           alt="Featured event"
+          width={1920} // recomand să setezi width și height fixe pentru optimizare
+          height={768} // poți ajusta în funcție de dimensiune, aici exemplu pentru 16:9
           className="w-full h-96 md:h-[32rem] object-cover"
+          priority 
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-6 md:p-10">
           <Badge className="mb-2 w-fit bg-yellow-400 text-yellow-900">Featured Event</Badge>

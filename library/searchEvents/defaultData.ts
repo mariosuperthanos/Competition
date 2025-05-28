@@ -37,6 +37,7 @@ const defaultData = async (tags = null) => {
       ORDER BY distance ASC
       LIMIT 13
     `;
+
     
   } else {
     // Query without tags filter
@@ -47,10 +48,10 @@ const defaultData = async (tags = null) => {
       WHERE "lat" IS NOT NULL 
         AND "lng" IS NOT NULL
       ORDER BY distance ASC
-      LIMIT 11
+      LIMIT 10
     `;
   }
-  const sliceLimit = tags === null ? 10 : 13;
+  const sliceLimit = tags === null ? 9 : 13;
 
   const events = await Promise.all(
     eventsRaw.slice(0, sliceLimit).map(async (event) => {
@@ -62,7 +63,7 @@ const defaultData = async (tags = null) => {
     })
   );
 
-  const existNextPage = eventsRaw.length > 10;
+  const existNextPage = eventsRaw.length > 9;
 
   return { events, existNextPage };
 }

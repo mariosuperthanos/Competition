@@ -6,6 +6,13 @@ import checkJWT from "../../../library/create-eventAPI/checkJWT";
 import defaultData from "../../../library/searchEvents/defaultData";
 import { get } from "http";
 import { fetchFilteredEvents } from "../../../library/searchEvents/searchQuery";
+import EventCard from "../../../components/searchPage/EventCard";
+import { Filter, Grid3X3, List, Sparkles, TrendingUp } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import SearchPage2 from "../../../components/searchPage/SearchPage";
+
+const popularTags = ["Technology", "Music", "Art", "Business", "Sports"]
 
 export default async function SearchEventsPage({
   searchParams,
@@ -29,21 +36,15 @@ export default async function SearchEventsPage({
   } else {
     console.log("Filters provided, fetching filtered events");
     const unfilteredEvents = await fetchFilteredEvents(filters);
-    events = unfilteredEvents.slice(0, 10);
-    existNextPagePagination = unfilteredEvents.length > 10;
+    events = unfilteredEvents.slice(0, 9);
+    existNextPagePagination = unfilteredEvents.length > 9;
     console.log("events", events);
   }
 
 
   return (
     <>
-      <div className="flex min-h-screen flex-col items-center justify-center p-6 md:p-10">
-        <div className="w-full max-w-sm md:max-w-3xl">
-          <EventSearchForm />
-          <Events eventsArray={events} />
-          <PaginationButtons nextServer={existNextPagePagination} />
-        </div>
-      </div>
+      <SearchPage2 events={events} existNext={existNextPagePagination} />
     </>
   );
 }
