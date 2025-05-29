@@ -18,7 +18,7 @@ model User {
   id            String         @id @default(uuid())
   name          String         @unique
   email         String         @unique
-  password      String         @unique
+  password      String         
   hostedEvents  Event[]        @relation("UserEvents")
   notifications Notification[] @relation("UserNotifications")
   timezone      String         @default("Europe/Madrid")

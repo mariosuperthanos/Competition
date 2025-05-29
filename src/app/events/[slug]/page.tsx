@@ -1,6 +1,5 @@
 "use server";
 import { Fragment } from "react";
-import Event from "../../../../components/event/Event";
 import TimeAndLocationCard from "../../../../components/event/TimeAndLocation";
 import prisma from "../../../../lib/prisma";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -78,7 +77,7 @@ export default async function EventPage({
     lng: longitude.toString(),
   };
 
-  const url = await getImageUrl(title);
+  const url = await getImageUrl(title+"BIG");
 
   const cookieStore = await cookies()
   const timezone1 = cookieStore.get('timezoneData');

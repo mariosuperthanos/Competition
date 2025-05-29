@@ -121,12 +121,12 @@ const MapComponent = ({
     <div
     style={{
       width: "50%",
-      height: settings.purpose !== "marker" ? "200px" : "410px",
+      height: settings.purpose !== "marker" ? "440px" : "410px",
       width: "100%",
       position: "relative",
       paddingLeft: "20px",
       paddingTop: "50px",
-      marginTop: "20px",
+      marginTop: "0px",
       marginLeft: "0px",
       display: shouldRender ? "block" : "none",
       border: "1px solid black",

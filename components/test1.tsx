@@ -46,7 +46,7 @@ export default function Event2({ id, title, description, time, host, location, i
   const [clicked, setClicked] = useState(buttonState === "unclicked" ? false : true);
 
   if (clicked === false) {
-    message = "Join the event!";
+    message = "Apply to the event!";
   } else if (buttonState === "rejected") {
     message = "You were rejected!";
   } else if (buttonState === "accepted") {
@@ -102,6 +102,7 @@ export default function Event2({ id, title, description, time, host, location, i
               </div>
             </CardContent>
           </Card>
+          <div className="pt-4"> </div>
           <MapComponent lat={lat} lng={lng} shouldRender={true} settings={{
             purpose: "marker",
           }} />

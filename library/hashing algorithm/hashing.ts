@@ -77,32 +77,3 @@ export function decryptString(hashedInput: string, salt=process.env.SALT, shift 
   }
 }
 
-export function testHashAndDecrypt(originalText, salt) {
-  console.log("=== Test Hash și Decrypt ===");
-  console.log("Text original:", originalText);
-  console.log("Salt folosit:", salt);
-
-  try {
-    // Hash-uim textul
-    const hashed = hashString(originalText, salt);
-    console.log("Text hash-uit:", hashed);
-
-    // Decriptam textul
-    const decrypted = decryptString(hashed, salt);
-    console.log("Text decriptat:", decrypted);
-
-    // Verificam daca decriptarea a fost reușita
-    const isSuccess = originalText === decrypted;
-    console.log("Test reușit:", isSuccess ? "DA" : "NU");
-
-    if (!isSuccess) {
-      console.log("EROARE: Textul decriptat nu corespunde cu originalul!");
-    }
-
-  } catch (error) {
-    console.error("Eroare în test:", error.message);
-  }
-
-  console.log("============================\n");
-}
-

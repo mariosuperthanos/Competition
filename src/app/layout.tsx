@@ -61,7 +61,7 @@ export default async function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100`}
       >
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<></>}>
           <QueryProvider>
             <LayoutContent
               session={session}

@@ -23,27 +23,28 @@ const uploadDir = "/tmp/uploads";
 
 export const POST = async (req: Request) => {
   try {
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    const userid = await checkJWT(req);
-
-    const data = await getData(req);
+    const [userid, _, data] = await Promise.all([
+      checkJWT(req),
+      fs.mkdir(uploadDir, { recursive: true }),
+      getData(req)
+    ]);
     console.log("data", typeof data.tags);
-    
+
     const filePath = path.join(uploadDir, data.file?.name);
-
-    await parseImage(data, filePath);
-
-    const inputPath = filePath;
     const outputPath = path.join(uploadDir, "outcome.jpeg");
 
-    await sharpImage(inputPath, outputPath);
+    // Rulează în paralel: validarea și salvarea fișierului
+    await Promise.all([
+      valdiateEventSchema(data),
+      parseImage(data, filePath)
+    ]);
 
-    // validate the req body
-    await valdiateEventSchema(data);
-
-    await uploadFile(outputPath, `${data.title}.jpeg`);
-
+    await sharpImage(filePath, outputPath);
+    await Promise.all([
+      uploadFile(outputPath, `${data.title}.jpeg`),
+      uploadFile(filePath, `${data.title}BIG.jpeg`)
+    ]);
+    await fs.rm(filePath);
     const addPost = await addEventInDB(data, userid);
 
     return NextResponse.json({ data: addPost }, { status: 200 });

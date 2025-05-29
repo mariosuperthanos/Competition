@@ -14,19 +14,7 @@ const formatData = (dateStr: string, hourStr: string) => {
 
   baseDate.setHours(hourInt);
   baseDate.setMinutes(parseInt(minute));
-
-  // const formattedDate = baseDate.toLocaleString("en-US", {
-  //   timeZone:"America/New_York",
-  //   weekday: "short",
-  //   year: "numeric",
-  //   month: "short",
-  //   day: "numeric",
-  //   hour: "2-digit",
-  //   minute: "2-digit",
-  //   timeZoneName: "long",
-  // });
-  // console.log(formattedDate);
-
+  
   return baseDate.toISOString();
 };
 
