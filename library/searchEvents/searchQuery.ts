@@ -1,4 +1,5 @@
 import prisma from "../../lib/prisma";
+import getImageUrl from "./getS3Image";
 
 
 type FetchEventParams = {
@@ -89,7 +90,7 @@ export async function fetchFilteredEvents(
 
   const events = await Promise.all(
     eventsRaw.slice(0, 11).map(async (event) => {
-      const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg';
+      const image = await getImageUrl(event.title);
       return {
         ...event,
         image,

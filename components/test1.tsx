@@ -61,32 +61,42 @@ export default function Event2({ id, title, description, time, host, location, i
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="relative w-full h-[600px] md:h-[550px] rounded-lg overflow-hidden mb-8">
-        <Image
-          src={image || "/placeholder.svg?height=550&width=800"}
-          alt={title}
-          fill
-          className="object-cover"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent flex items-end">
-          <div className="p-6 text-white">
-            <h1 className="text-3xl md:text-4xl font-bold">{title}</h1>
-          </div>
+      <div className="relative w-full h-64 sm:h-80 md:h-96 lg:h-[550px] xl:h-[600px] rounded-lg sm:rounded-xl overflow-hidden mb-6 sm:mb-8">
+      <Image
+        src={image || "/placeholder.svg?height=600&width=800"}
+        alt={title}
+        fill
+        className="object-cover"
+        sizes="100vw"
+        priority
+      />
+
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent flex items-end">
+        <div className="p-4 sm:p-6 md:p-8 text-white w-full">
+          <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold leading-tight max-w-full break-words">
+            {title}
+          </h1>
         </div>
-        {tags?.length > 0 && (
-          <div className="absolute top-4 right-4 flex flex-row items-end gap-2 z-10">
-            {tags.map((tag, index) => (
-              <span
-                key={index}
-                className="bg-black/70 text-white text-base px-3 py-1 rounded-full"
-              >
-                #{tag}
-              </span>
-            ))}
-          </div>
-        )}
       </div>
+
+      {tags?.length > 0 && (
+        <div className="absolute top-3 sm:top-4 right-3 sm:right-4 flex flex-wrap items-start gap-1 sm:gap-2 z-10 max-w-[60%] sm:max-w-[50%] justify-end">
+          {tags.slice(0, 4).map((tag, index) => (
+            <span
+              key={index}
+              className="bg-black/70 text-white text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1 rounded-full font-medium backdrop-blur-sm"
+            >
+              #{tag}
+            </span>
+          ))}
+          {tags.length > 4 && (
+            <span className="bg-black/70 text-white text-xs sm:text-sm md:text-base px-2 sm:px-3 py-1 rounded-full font-medium backdrop-blur-sm">
+              +{tags.length - 4}
+            </span>
+          )}
+        </div>
+      )}
+    </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
         <div className="md:col-span-2">
@@ -168,7 +178,11 @@ export default function Event2({ id, title, description, time, host, location, i
             </CardHeader>
             <CardContent>
               <div className="flex gap-4">
-                <button className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors" onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, '_blank')} >
+                <button
+                  className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+                  onClick={() => window.open(`https://www.facebook.com/sharer/sharer.php?u=${shareUrl}`, '_blank')}
+                  aria-label="Share on Facebook"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -183,7 +197,12 @@ export default function Event2({ id, title, description, time, host, location, i
                     <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z" />
                   </svg>
                 </button>
-                <button className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors" onClick={() => window.open(`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`, '_blank')}>
+
+                <button
+                  className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+                  onClick={() => window.open(`https://twitter.com/intent/tweet?url=${shareUrl}&text=${shareText}`, '_blank')}
+                  aria-label="Share on Twitter"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -198,7 +217,12 @@ export default function Event2({ id, title, description, time, host, location, i
                     <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
                   </svg>
                 </button>
-                <button className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors" onClick={() => window.open('https://www.instagram.com', '_blank')}>
+
+                <button
+                  className="p-2 rounded-full bg-muted hover:bg-muted/80 transition-colors"
+                  onClick={() => window.open('https://www.instagram.com', '_blank')}
+                  aria-label="Share on Instagram"
+                >
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="20"
@@ -216,6 +240,7 @@ export default function Event2({ id, title, description, time, host, location, i
                   </svg>
                 </button>
               </div>
+
             </CardContent>
           </Card>
 
