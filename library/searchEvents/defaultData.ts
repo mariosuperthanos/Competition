@@ -38,7 +38,7 @@ const defaultData = async (tags = null) => {
       LIMIT 13
     `;
 
-    
+
   } else {
     // Query without tags filter
     eventsRaw = await prisma.$queryRaw`
@@ -54,14 +54,18 @@ const defaultData = async (tags = null) => {
   const sliceLimit = tags === null ? 9 : 13;
 
   const events = await Promise.all(
-    eventsRaw.slice(0, sliceLimit).map(async (event) => {
-      const image = 'https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg';
+    eventsRaw.slice(0, sliceLimit).map(async (event, index) => {
+      // Dacă e primul event, adaugă "BIG" la titlu
+      const titleForImage = index === 0 ? event.title + "BIG" : event.title;
+      const image = await getImageUrl(titleForImage);
+
       return {
         ...event,
         image,
       };
     })
   );
+
 
   const existNextPage = eventsRaw.length > 9;
 

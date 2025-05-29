@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Eye, EyeOff, Mail, Lock, User, Sparkles } from "lucide-react"
+import { Eye, EyeOff, Mail, Lock, User, Sparkles, Wand2, Leaf } from "lucide-react"
 import { loginUtil } from "../../library/authUtils/loginUtil"
 import { z } from "zod"
 import { formSchema } from "../../library/schemas/create-event"
@@ -88,7 +88,7 @@ export default function AuthForm({ mode = "login" }: AuthPageProps) {
         setFeedback("Email or password is incorrect. Please try again.");
       } else {
         setFeedback("Name and email must be unique. Please use a different name or email address.");
-      }  
+      }
       console.error(error);
     } finally {
       setIsLoading(false);
@@ -117,7 +117,7 @@ export default function AuthForm({ mode = "login" }: AuthPageProps) {
         <Card className="w-full max-w-md backdrop-blur-lg bg-white/80 border-white/20 shadow-2xl">
           <CardHeader className="text-center space-y-4">
             <div className="mx-auto w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+              <Leaf className="w-6 h-6 text-white" />
             </div>
             <div>
               <CardTitle className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
@@ -200,6 +200,7 @@ export default function AuthForm({ mode = "login" }: AuthPageProps) {
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -229,6 +230,7 @@ export default function AuthForm({ mode = "login" }: AuthPageProps) {
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                       className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                     >
                       {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                     </button>

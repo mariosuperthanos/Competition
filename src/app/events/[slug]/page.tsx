@@ -102,6 +102,8 @@ export default async function EventPage({
   const buttonState = data !== null ? data.buttonState : "unclicked";
   console.log("button state:", buttonState)
 
+  const imageUrl = await getImageUrl(title + "BIG");
+
   const eventData = {
     id,
     title,
@@ -109,7 +111,7 @@ export default async function EventPage({
     time: result,
     host: hostName,
     location: `${city}, ${country}`,
-    image: "https://letsenhance.io/static/73136da51c245e80edc6ccfe44888a99/1015f/MainBefore.jpg",
+    image: imageUrl,
     lat: latitude,
     lng: longitude,
     tags,

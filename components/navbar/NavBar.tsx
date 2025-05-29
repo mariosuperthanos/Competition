@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { LogOut, Menu } from "lucide-react";
+import { LogOut, Menu, Zap } from "lucide-react";
 import Cookies from "js-cookie";
 
 import { Button } from "@/components/ui/button";
@@ -49,6 +49,19 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
       >
         Logout
       </Button>
+      <Link href="/fast-events">
+        <Button
+          variant="ghost"
+          className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-500 text-white border-2 border-purple-400 hover:from-purple-700 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
+        >
+          <span className="relative z-10 flex items-center gap-2">
+            <Zap className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
+            Fast Events
+            <Zap className="h-4 w-4 group-hover:-rotate-12 transition-transform duration-300" />
+          </span>
+          <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+        </Button>
+      </Link>
     </>
   ) : (
     <>
@@ -87,6 +100,20 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
           {isLoggedIn ? (
             <>
               <div className="relative">
+                <Link href="/fast-events">
+                  <Button
+                    variant="ghost"
+                    className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-500 text-white border-2 border-purple-400 hover:from-purple-700 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group mr-3"
+                  >
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Zap className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
+                      Fast Events
+                      <Zap className="h-4 w-4 group-hover:-rotate-12 transition-transform duration-300" />
+                    </span>
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                  </Button>
+                  
+                </Link>
                 <Link href="/notifications">
                   <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
                     Notifications
@@ -115,6 +142,7 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
               >
                 Logout
               </Button>
+
             </>
           ) : (
             <>
