@@ -7,7 +7,6 @@ import MapComponent from "./event/Map";
 import { useEffect, useState } from "react";
 import Cookie from 'js-cookie';
 import { getCsrfToken, getSession, useSession } from "next-auth/react";
-import { getServerSession } from "next-auth";
 import axios from "axios";
 
 interface EventPageProps {
@@ -36,10 +35,9 @@ function formatDate(date: Date): string {
   })
 }
 let message = "";
-export default function Event2({ id, title, description, time, host, location, image, tags, lat, lng, clientName, clientId, buttonState }: EventPageProps) {
-  const { data: session, status } = useSession();
+export default function Event2({ id, title, description, time, host, location, image, tags, lat, lng, clientName, clientId, buttonState, linkURL }: EventPageProps) {
   const shareText = encodeURIComponent("Check out this interesting post!");
-  const shareUrl = encodeURIComponent(`${window.location.origin}`);
+  const shareUrl = encodeURIComponent(`${linkURL}`);
   // Convert time to Date object if it's a string
   const eventStartHour = typeof time.startHour === "string" ? new Date(time) : time
   console.log(time);

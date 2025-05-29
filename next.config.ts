@@ -8,6 +8,10 @@ const nextConfig: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Remove console logs in production (Next.js 13+ method)
+  compiler: {
+    removeConsole: true,
+  },
 
   // If you're experiencing issues, you can try the webpack dev middleware config:
   images: {

@@ -158,36 +158,6 @@ export async function middleware(request: NextRequest) {
       return new NextResponse('Too many requests', { status: 429 })
     }
 
-    // Aplica CORS DOAR daca ruta e API
-    // if (request.nextUrl.pathname.startsWith('/api/')) {
-    //   const origin = request.headers.get('origin')
-    //   const allowedOrigins = ['http://localhost:3000', 'https://siteultau.com']
-
-    //   if (!origin || !allowedOrigins.includes(origin)) {
-    //     return new NextResponse('Origin not allowed', { status: 403 })
-    //   }
-
-    //   const corsHeaders = {
-    //     'Access-Control-Allow-Origin': origin,
-    //     'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    //     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    //   }
-
-    //   if (request.method === 'OPTIONS') {
-    //     return new NextResponse(null, {
-    //       status: 204,
-    //       headers: corsHeaders,
-    //     })
-    //   }
-
-    //   const response = NextResponse.next()
-    //   Object.entries(corsHeaders).forEach(([key, value]) => {
-    //     response.headers.set(key, value)
-    //   })
-
-    //   return response
-    // }
-
     // Pentru celelalte rute, doar continua
     return NextResponse.next()
   } catch (error) {
