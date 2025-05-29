@@ -39,7 +39,7 @@ let message = "";
 export default function Event2({ id, title, description, time, host, location, image, tags, lat, lng, clientName, clientId, buttonState }: EventPageProps) {
   const { data: session, status } = useSession();
   const shareText = encodeURIComponent("Check out this interesting post!");
-  const shareUrl = encodeURIComponent("https://exemplu.ro/postare");
+  const shareUrl = encodeURIComponent(`${window.location.origin}`);
   // Convert time to Date object if it's a string
   const eventStartHour = typeof time.startHour === "string" ? new Date(time) : time
   console.log(time);
