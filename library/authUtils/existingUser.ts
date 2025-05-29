@@ -1,5 +1,6 @@
 import prisma from "../../lib/prisma";
-import bcrypt from "bcryptjs";
+// import bcrypt from "bcryptjs";
+import { decryptString } from "../hashing algorithm/hashing";
 
 export const existingUser = async (
   inputPassword: string,
@@ -15,7 +16,10 @@ export const existingUser = async (
   if (!user) return undefined;
 
   // compare the passwords
-  const isPasswordUsed = await bcrypt.compare(inputPassword, user.password);
+  const candidatePassword = inputPassword;
+  const decryptedPassword = decryptString(user.password);
+  const isPasswordUsed = decryptedPassword === candidatePassword;
+  // const isPasswordUsed = await bcrypt.compare(inputPassword, user.password);
 
-  return isPasswordUsed ? { email: user.email, id: user.id, name:user.name } : undefined;
+  return isPasswordUsed ? { email: user.email, id: user.id, name: user.name } : undefined;
 };

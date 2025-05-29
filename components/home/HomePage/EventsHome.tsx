@@ -1,13 +1,8 @@
-import { Check, Mic, Users, Calendar, MapPin, Music, Film, Book, Coffee, Utensils } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+'use client'
+
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import EventCardHome from "./EventCardHome"
-import { useRef, useState } from "react"
-import useStore from "../../../zustand/store"
 import Link from "next/link"
-
 
 const EventsHome = ({ defaultEvent, tags, focusedTag = "all" }) => {
   return (
@@ -53,25 +48,31 @@ const EventsHome = ({ defaultEvent, tags, focusedTag = "all" }) => {
             ))}
           </TabsList>
         </Tabs>
+        {defaultEvent.length !== 0 ? (
+          <TabsContent value="all" className="mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {defaultEvent.map((event) => (
+                <EventCardHome
+                  key={event.id}
+                  id={event.id}
+                  title={event.title}
+                  description={event.description}
+                  startHour={event.startHour}
+                  country={event.country}
+                  city={event.city}
+                  tags={event.tags}
+                  image={event.image}
+                  hostName={event.hostName}
+                />
+              ))}
+            </div>
+          </TabsContent>
+        ) : (
+          <p className="text-center text-gray-700">
+            There were no events found with the "{focusedTag}" tag.
+          </p>
 
-        <TabsContent value="all" className="mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {defaultEvent.map((event) => (
-              <EventCardHome
-                key={event.id}
-                id={event.id}
-                title={event.title}
-                description={event.description}
-                startHour={event.startHour}
-                country={event.country}
-                city={event.city}
-                tags={event.tags}
-                image={event.image}
-                hostName={event.hostName}
-              />
-            ))}
-          </div>
-        </TabsContent>
+        )}
       </Tabs>
     </section>
   );

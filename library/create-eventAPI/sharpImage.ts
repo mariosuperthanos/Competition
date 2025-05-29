@@ -11,7 +11,6 @@ const sharpImage = async (inputPath: string, outputPath: string): Promise<void> 
     await sharp(inputPath)
       .jpeg({ quality: 60 })
       .toFile(outputPath);
-    await fs.rm(inputPath);
   } catch (err) {
     console.log(err);
   }

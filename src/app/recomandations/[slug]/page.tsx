@@ -22,6 +22,7 @@ export default async function Page({
 
   const { slug } = await params;
   const { events } = await defaultData([slug]);
+  console
 
   const capitalized = slug.charAt(0).toUpperCase() + slug.slice(1);
 

@@ -1,21 +1,20 @@
-// app/api/logout/route.ts
 import { NextResponse } from "next/server";
 
-export async function GET() {
-  const response = NextResponse.redirect("/");
+export async function GET(req: Request) {
+  const response = NextResponse.json({ JWT: "" });
 
-  // Setează cookie-urile ca fiind expirate pentru a le șterge
-  response.cookies.set("next-auth.callback-url", "", {
+  // Șterge cookie-urile relevante pentru logout
+  response.cookies.set("next-auth.session-token", "", {
     path: "/",
-    maxAge: 0, // Expiră cookie-ul imediat
+    maxAge: 0,
   });
 
   response.cookies.set("next-auth.csrf-token", "", {
     path: "/",
     maxAge: 0,
   });
-
-  response.cookies.set("next-auth.session-token", "", {
+  
+  response.cookies.set("next-auth.callback-url", "", {
     path: "/",
     maxAge: 0,
   });
