@@ -80,6 +80,7 @@ export default function AuthForm({ mode = "login" }: AuthPageProps) {
       setIsLoading(true);
       if (!isSignUp) {
         await loginUtil(data.email, data.password);
+        window.location.href = "/";
       } else {
         await signUpHandler(data);
       }
