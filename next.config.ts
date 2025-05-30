@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
   },
   // Remove console logs in production (Next.js 13+ method)
   compiler: {
-    removeConsole: true,
+    removeConsole: false,
   },
 
   // If you're experiencing issues, you can try the webpack dev middleware config:

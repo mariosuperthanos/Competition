@@ -332,6 +332,7 @@ const CreateUserComp = () => {
                                   if (date) {
                                     const formattedTime = date.format("hh:mm A")
                                     field.onChange(formattedTime)
+                                    console.log("Selected date:", formattedTime)
                                   } else {
                                     field.onChange("")
                                   }
@@ -360,6 +361,7 @@ const CreateUserComp = () => {
                                   if (date) {
                                     const formattedTime = date.format("hh:mm A")
                                     field.onChange(formattedTime)
+                                    console.log("Selected date:", formattedTime)
                                   } else {
                                     field.onChange("")
                                   }
