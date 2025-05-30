@@ -13,10 +13,17 @@ export const formSchema = z
     }),
     date: z
       .date({
-        message: "A date is required.",
+        required_error: "Data este obligatorie.",
+        invalid_type_error: "Data introdusă nu este validă.",
       })
-      .refine((date) => date > new Date(), {
-        message: "Date must be in the future.",
+      .refine((inputDate) => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        yesterday.setHours(0, 0, 0, 0); // Normalizează la ora 00:00
+
+        return inputDate > yesterday;
+      }, {
+        message: "Data trebuie să fie mai mare decât ieri.",
       }),
     startHour: z
       .string()
