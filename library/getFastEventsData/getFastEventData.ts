@@ -7,6 +7,7 @@ async function getUpcomingEventsWithinRange(
   timeRange: number
 ) {
   const now = new Date();
+  console.log(city, country, timeRange);
 
   const todayStr = now.toISOString().slice(0, 10); // "YYYY-MM-DD"
   const tomorrow = new Date(now);
@@ -18,27 +19,31 @@ async function getUpcomingEventsWithinRange(
     where: {
       city,
       country,
-      OR: [
-        { date: todayStr },
-        { date: tomorrowStr },
-      ],
     },
   });
   console.log("events from prisma", events);
 
   const nowMs = now.getTime();
   const rangeEndMs = nowMs + timeRange * 60 * 60 * 1000;
+  const rangeEnd = new Date(now.getTime() + timeRange * 60 * 60 * 1000);
 
-  const filtredEvents = events
-    .filter(e => {
-      const eventTime = new Date(e.startHour).getTime();
-      return eventTime >= nowMs && eventTime <= rangeEndMs;
+  const filteredEvents = events
+    .filter((event) => {
+      const start = new Date(event.startHour);
+      // 1. Data startHour = azi (în fusul orar UTC)
+      const isToday =
+        start.toISOString().slice(0, 10) === todayStr;
+
+      // 2. startHour este între acum și intervalul limită
+      const inRange = start >= now && start <= rangeEnd;
+
+      return isToday && inRange;
     })
-    .sort((a, b) => new Date(a.startHour).getTime() - new Date(b.startHour).getTime())
-    .slice(0, 12);
+    .sort((a, b) => new Date(a.startHour).getTime() - new Date(b.startHour).getTime());
+  console.log("filteredEvents", filteredEvents);
 
   const eventsWithImage = await Promise.all(
-    filtredEvents.map(async (event, index) => {
+    filteredEvents.map(async (event, index) => {
       // Dacă e primul event, adaugă "BIG" la titlu
       const titleForImage = index === 0 ? event.title + "BIG" : event.title;
       const image = await getImageUrl(titleForImage);

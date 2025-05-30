@@ -28,7 +28,7 @@ export const POST = async (req: Request) => {
       fs.mkdir(uploadDir, { recursive: true }),
       getData(req)
     ]);
-    console.log("data", typeof data.tags);
+    console.log("data", data);
 
     const filePath = path.join(uploadDir, data.file?.name);
     const outputPath = path.join(uploadDir, "outcome.jpeg");
