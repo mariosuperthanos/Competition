@@ -26,6 +26,9 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
   console.log(hasUnread, "hasUnread from NavBar");
   const navItems = isLoggedIn ? (
     <>
+      <Button variant="ghost" asChild className="w-full justify-start bg-white text-black border-b">
+        <Link href="/tags">Tags</Link>
+      </Button>
       <Button variant="ghost" asChild className="w-full justify-start bg-white text-black border-b relative">
         <Link href="/notifications">
           Notifications
@@ -99,32 +102,30 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
         <nav className="hidden md:flex items-center space-x-4">
           {isLoggedIn ? (
             <>
-              <div className="relative">
-                <Link href="/fast-events">
-                  <Button
-                    variant="ghost"
-                    className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-500 text-white border-2 border-purple-400 hover:from-purple-700 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group mr-3"
-                  >
-                    <span className="relative z-10 flex items-center gap-2">
-                      <Zap className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
-                      Fast Events
-                      <Zap className="h-4 w-4 group-hover:-rotate-12 transition-transform duration-300" />
-                    </span>
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </Button>
-                  
-                </Link>
-                <Link href="/notifications">
-                  <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
-                    Notifications
-                  </Button>
-                  {hasUnread && (
-                    <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold">
-                      !
-                    </span>
-                  )}
-                </Link>
-              </div>
+              <Link href="/fast-events">
+                <Button
+                  variant="ghost"
+                  className="relative overflow-hidden bg-gradient-to-r from-purple-600 to-pink-500 text-white border-2 border-purple-400 hover:from-purple-700 hover:to-pink-600 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl group"
+                >
+                  <span className="relative z-10 flex items-center gap-2">
+                    <Zap className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
+                    Fast Events
+                    <Zap className="h-4 w-4 group-hover:-rotate-12 transition-transform duration-300" />
+                  </span>
+                  <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                </Button>
+              </Link>
+              <Link href="/notifications" className="relative">
+                <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
+                  Notifications
+                </Button>
+                {hasUnread && (
+                  <span className="absolute -top-2 -right-2 inline-flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold">
+                    !
+                  </span>
+                )}
+              </Link>
+
               <Link href="/search-events">
                 <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
                   Join Event
@@ -133,6 +134,11 @@ function NavBar({ isLoggedIn, hasUnread }: NavBarProps) {
               <Link href="/create-event">
                 <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
                   Create Event
+                </Button>
+              </Link>
+              <Link href="/tags">
+                <Button variant="ghost" className="border border-black hover:bg-black hover:text-white">
+                  Tags
                 </Button>
               </Link>
               <Button

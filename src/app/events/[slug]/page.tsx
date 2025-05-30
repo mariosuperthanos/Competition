@@ -104,6 +104,8 @@ export default async function EventPage({
 
   const imageUrl = await getImageUrl(title + "BIG");
 
+  const urlLink = process.env.NEXT_PUBLIC_NEXTAUTH_URL;
+
   const eventData = {
     id,
     title,
@@ -117,8 +119,10 @@ export default async function EventPage({
     tags,
     clientId,
     clientName,
-    buttonState
+    buttonState,
+    linkURL: urlLink 
   };
+
 
   return (
     <Fragment>
